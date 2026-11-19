@@ -1,3 +1,58 @@
+<!--
+================================================================================
+  一念 · 更新记录 / CHANGELOG
+--------------------------------------------------------------------------------
+  【维护约定 · 接手本项目的 AI / 开发者请务必遵守】
+  1. 本文件为单文件 HTML 应用（HTML/CSS/JS 全在一个文件里）。
+     每次对功能或样式做任何优化、修改后，必须在本注释块的「更新记录」区
+     追加一条记录，不得省略。
+  2. 记录格式：日期 + 序号 + 简短说明；新记录统一追加在最上方。
+  3. 即使你是更换 AI 账号、或在全新对话里接手本项目，也请自动延续维护
+     这份记录，无需用户再次提醒或重复说明这条设定。
+  4. 修改时只改动功能代码与本记录本身，请勿删除或改写本「维护约定」区块。
+  5. 目标机型兼容：本项目主要在「华为 Mate 20 + 夸克浏览器」上使用。
+     每次优化功能或设置后，必须一并检查该机型/浏览器的兼容性，重点排查已知坑：
+     flex 容器 gap、CSS 变量里的超长 data URL、background-attachment:fixed、
+     backdrop-filter、100vh/dvh、canvas 取色等；发现问题就顺手修复。
+--------------------------------------------------------------------------------
+  【更新记录】（最新在最上方）
+  2026-11-19  ㉟问卷查看浮层微调：标题「当时的问卷」右侧标注题型（单选/多选）；内容精简为问题 + 选项（所选高亮）+「选择了：xxx」，去掉卡片里重复的题型行。兼容 Mate20 夸克（题型用 absolute 定位、间距仍用 margin）。
+  2026-11-19  ㉞问卷答案回看改为浮层：点梦角「我选：…」上方的引用小字，不再滚动定位原卡片 + 闪烁高亮，改为弹出「当时的问卷」浮层直接查看原题、全部选项与所选项（TA 选的高亮），点「关闭」或遮罩即可关；普通引用小字仍保持跳回原消息高亮。原问卷消息万一不在则退回显示引用文字。沿用 --mvh 适配与 margin 间距，兼容 Mate20 夸克。
+  2026-11-19  ㉝问卷卡片精简与答案回看：卡片去掉「限时X秒/随机时间」与作答时刻，只高亮所选项；TA 的「我选：…」带上原问卷的问题与消息 id（引用小字「问卷：题目」），点它跳回原问卷卡片并高亮，隔再久/刷再多也能找回当时的题。
+  2026-11-19  ㉜问卷接入聊天：点发送后问卷作为卡片直接进聊天（题型/问题/选项/限时显示）；新增 survey 消息类型与卡片渲染（作答后高亮选项、显示「TA 选择了」与作答时刻）；TA 在设定时限内随机挑时刻作答（随机的 3~45 秒内），单选随机挑一项、多选随机挑几项，先显示输入中再发「我选：…」；replyAt 绝对时刻存进消息，初始化与切回前台补答（mid 去重），关页面重进到点也生效；搜索/导出/引用走 msgPlainText。兼容 Mate20 夸克：卡片间距全用 margin，无 gap/:has()/100vh。
+  2026-11-19  ㉛问卷框架微调：选项由「逐个增删的输入框」改为单个多行文本框，一行一个答案（换行即下一项）；回复时间改为同一行三栏——左侧时间框 + 单位（秒/分钟）+ 右侧「随机」按钮，点随机则禁用时间框并置灰。兼容 Mate20 夸克（间距仍用 margin）。
+  2026-11-19  ㉚问卷框架：聊天输入栏「圆圈问号」按钮改为打开问卷弹窗——题型（单选/多选）、问题输入、选项文字标记框（可增删）、回复时间（随机/自选数值+秒或分钟单位）；发送先存草稿待接完整答题流程。间距统一用 margin 规避 flex gap，未用 :has()/100vh，兼容 Mate20 夸克。
+  2026-11-19  ㉙华为 Mate20 夸克兼容：聊天气泡间距由 flex gap 改用相邻 margin（消息行/头像与时间/主动标注），修复老内核间距失效或不自然；夸克兼容性检测写入顶部维护约定。
+  2026-11-19  ㉘华为 Mate20 夸克兼容：壁纸改由 JS 拼好 background-image 直接内联（不再靠 CSS 变量存 base64），去掉 background-attachment:fixed，修复「选了壁纸页面不变」。
+  2026-11-19  ㉗主动留言档位修正：留言条数改按「我没发消息的总时长」算（还原真实模拟曲线），游标只管时间戳铺排与去重；锚点只认最后发消息时间、不再回退到会被推进的游标，避免基准漂移。
+  2026-11-19  ㉖拼字卡的颜文字位置改为随机（可在字卡前/中/后，不再固定在末尾）；仍不加 / 分隔符。
+  2026-11-19  ㉕主动留言改为「真实模拟离线留言」：以我最后发消息的时间为起点，满 2 小时算我不在线，之后 TA 按概率/节奏主动留言；页面关着也按真实时间计，重开时补发离开期间的留言（游标去重），我发新消息即重新计时。
+  2026-11-19  ㉔统一顶部功能栏高度：字卡库/信箱/设置功能栏同为44px；设置功能栏由气泡改为下方横线激活模式。
+  2026-11-19  ㉓修复主动发消息不生效：开启 autoContactOn 时重置配额并立即重启定时器（此前开关只保存不重启）。
+  2026-11-19  ㉒聊天输入栏旁问卷与表情包按钮对调位置（问卷在前、表情包在后）。
+  2026-11-19  ㉑表情包/颜文字面板：颜文字改为三组一行（表情包仍四列）。
+  2026-11-19  ⑳使用大全首行（标题+搜索）固定，展开内容在气泡内上下滚动查看。
+  2026-11-19  ⑲朋友圈无顶部功能栏，取消其横滑切换；应用级横滑循环缩为字卡库↔信箱两页，设置/主页/聊天仍不纳入。
+  2026-11-19  ⑱引用消息改为单行省略显示；点引用小字跳回原消息并高亮，消息加稳定 id 供定位。
+  2026-11-19  ⑰恢复字卡库/朋友圈/信箱顶部栏横滑与信箱三分类横滑；滑动只在三内容页及信箱分类内部循环，不跳主页/聊天/设置。
+  2026-11-19  ⑯主页齿轮进的设置隐藏返回键，仅聊天 ⋯ 进的设置显示返回键。
+  2026-11-19  ⑮声音提醒加固：常驻静音振荡器防 AudioContext 被回收、切后台回来恢复、开关手势里解锁并试响，修复偶尔没声音。
+  2026-11-19  ⑭聊天输入栏下方留白修复：安卓可视视口下移时用 --chat-y 抵消 offsetTop，并放宽键盘判定。
+  2026-11-19  ①写信页「夹表情包」只取字卡库表情包，隐藏颜文字标签，点击直接进入表情包库。
+  2026-11-19  ②写信底部栏改白底；夹图加图片图标、夹表情包加表情图标；三个气泡收窄等高，寄出加长。
+  2026-11-19  ③写信输入区加信纸横线，文字一行行落在横线上，横线随内容滚动。
+  2026-11-19  ④朋友圈动态正文字号改为 .88rem，与聊天对话气泡一致。
+  2026-11-19  ⑤数据整理导出选择项「壁纸·头像·昵称·功能设置」改为「参数设置」。
+  2026-11-19  ⑥寄出按钮高度与夹图胶囊对齐（.84rem / 行高1.2 / 上下6px / 全圆角，左右44px）。
+  2026-11-19  ⑦数据整理删除「导出 TXT」，仅保留「导出 JSON」「导入数据」；导入仍兼容旧 .txt。
+  2026-11-19  ⑧聊天：软键盘未真正弹出时不再收缩聊天页，修复输入栏上方留大块空白；音频解锁改多手势并加大提示音，修复开关开了没声音。
+  2026-11-19  ⑨设置页顶部栏补回返回键。
+  2026-11-19  ⑩字卡库/朋友圈/信箱/设置取消左右滑动切换，改回底部工具栏点击；信箱三分类取消横滑，改顶部点击。
+  2026-11-19  ⑪长按消息图标条的「引用」图标改为黑色。
+  2026-11-19  ⑫统一聊天气泡宽度：拼卡与普通字卡上限同为 58%，「主动」消息不再额外收窄，解决同样多字气泡长短不一。
+  2026-11-19  ⑬修复设置页滑动误跳到邮箱的问题（同源为取消设置页横滑）。
+================================================================================
+-->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -132,33 +187,68 @@ body.settings-open #chat{visibility:hidden}
 /* 高度/位移由 visualViewport 驱动：键盘弹出时贴合可视区，输入框自然贴键盘上移、顶栏不动 */
 /* 键盘升降不要加 height/transform 过渡：安卓 WebView 里过渡会和 visualViewport 的
    连续 resize/scroll 形成回弹，表现就是「发送后输入栏回位时弹跳」。直接跟随视口最稳。 */
-/* 顶栏固定不动：键盘弹出时只用 --chat-h 贴合可视区高度，不再整体 translateY（offsetTop 抖动会带着顶栏一起跳） */
-#chat{padding-bottom:0;height:var(--chat-h,100%);transition:none}
+/* 键盘弹出时：--chat-h 贴合可视区高度，--chat-y 抵消 visualViewport 的 offsetTop。
+   部分安卓 WebView 弹键盘时布局视口不缩小，只是可视视口整体下移（offsetTop>0），
+   若不用 top 抵消，输入栏下方就会空出 offsetTop 那么大的一块白。top 值已量化+节流，不会抖。 */
+#chat{padding-bottom:0;height:var(--chat-h,100%);top:var(--chat-y,0px);transition:none}
 /* 长按气泡只走我们自己的引用/撤回菜单：禁掉系统自带的拷贝/查询/翻译/搜索网页等 */
-.chat-body{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;gap:16px;overscroll-behavior:contain;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.chat-body{flex:1;overflow-y:auto;padding:16px 12px;display:flex;flex-direction:column;overscroll-behavior:contain;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+.chat-body > * + *{margin-top:16px}  /* 夸克兼容：flex gap 用相邻 margin 兜底 */
 .chat-body .msg-bubble,.chat-body .msg-bubble *{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
 /* 消息行之间用固定 gap；行本身不允许被压缩，多行文字撑高时只增高不挤压，间距保持固定、不重叠贴近 */
-.msg-row{display:flex;gap:10px;align-items:flex-start;position:relative;flex-shrink:0}
+.msg-row{display:flex;align-items:flex-start;position:relative;flex-shrink:0}
 .msg-row.me{flex-direction:row-reverse}
+/* 夸克兼容：头像与气泡间距由 gap 改 margin（普通行头像在左，me 行头像在右） */
+.msg-row .msg-side{margin-right:10px}
+.msg-row.me .msg-side{margin-right:0;margin-left:10px}
 .msg-avatar{width:40px;height:40px;border-radius:50%;background:#ddd;overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#666;font-size:1rem;cursor:pointer}
 .msg-avatar img{width:100%;height:100%;object-fit:cover}
 /* 头像竖排容器：头像在上，时间在下 */
-.msg-side{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;min-width:40px}
+.msg-side{display:flex;flex-direction:column;align-items:center;flex-shrink:0;min-width:40px}
+.msg-side > * + *{margin-top:4px}
 /* 头像下方只显示时刻（日期改到每天第一条消息上方） */
 .msg-time{font-size:.6rem;color:var(--msg-ink);line-height:1.25;text-align:center;max-width:56px;white-space:nowrap;letter-spacing:-.01em;user-select:none}
 /* 主动联系消息：气泡 + 下方「主动」标注（与正文同色，字号比正文小一号） */
-.msg-auto-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:4px;max-width:58%;min-width:0}
-.msg-auto-wrap .msg-bubble{max-width:100%}
+/* 「主动」标注只是气泡下方一行小字，不再额外套一层收窄的容器，
+   保证同样是长字的字卡，气泡宽度和普通消息一致 */
+.msg-auto-wrap{display:flex;flex-direction:column;align-items:flex-start;min-width:0}
+.msg-auto-wrap > * + *{margin-top:4px}
+.msg-auto-wrap .msg-bubble{max-width:58%}
 .msg-auto-wrap .msg-bubble.emoji-bubble{max-width:150px}
 .msg-tag{display:block;font-size:.66rem;line-height:1.2;color:var(--msg-sub);letter-spacing:.02em;user-select:none;-webkit-user-select:none;padding-left:4px;position:relative;z-index:1}
 .msg-bubble{max-width:58%;padding:8px 11px;border-radius:15px;background:rgba(var(--card-rgb),var(--bubble-a,1));border:1px solid var(--line);box-shadow:var(--shadow);font-size:.88rem;line-height:1.45;color:var(--msg-ink);word-break:break-word}
 .msg-bubble.emoji-bubble{background:transparent;border:none;box-shadow:none;padding:0;max-width:150px}
 .msg-bubble.emoji-bubble img{width:100%;max-width:150px;max-height:150px;object-fit:contain;display:block}
-/* 拼卡：所有片段放进同一个气泡，片段之间用 / 分隔 */
-.msg-bubble.pincard-bubble{max-width:72%;line-height:1.7}
+/* 拼卡：所有片段放进同一个气泡，片段之间用 / 分隔；
+   宽度上限与普通气泡统一为 58%，避免同样多字的字卡气泡忽长忽短 */
+.msg-bubble.pincard-bubble{max-width:58%;line-height:1.7}
 /* 拼卡分隔符：固定纯黑、不透明，避免浅色字/半透明导致「有时看不见」 */
 .pin-sep{opacity:1;color:var(--msg-ink)!important;margin:0 4px;font-weight:600;user-select:none;-webkit-user-select:none}
 .pin-inline-img{width:auto;max-width:96px;max-height:96px;object-fit:contain;display:inline-block;vertical-align:middle;margin:0 2px}
+/* 问卷卡片：我发出的问卷，TA 作答后高亮所选项（间距用 margin，兼容 Mate20 夸克） */
+.msg-bubble.survey-bubble{max-width:76%;min-width:190px;padding:10px 12px}
+.sv-card{display:flex;flex-direction:column}
+.sv-head{font-size:.7rem;color:var(--msg-sub);margin-bottom:6px;line-height:1.4}
+.sv-q{font-size:.9rem;line-height:1.45;color:var(--msg-ink);margin-bottom:8px;word-break:break-word}
+.sv-opts{display:flex;flex-direction:column}
+.sv-opt{display:flex;align-items:flex-start;font-size:.85rem;line-height:1.45;color:var(--msg-ink)}
+.sv-opt + .sv-opt{margin-top:6px}
+.sv-mark{width:16px;height:16px;flex-shrink:0;border:1.5px solid #bfc3ca;border-radius:50%;margin-right:8px;margin-top:1px;position:relative;box-sizing:border-box}
+.sv-mark.multi{border-radius:4px}
+.sv-opt.picked .sv-mark{background:var(--accent);border-color:var(--accent)}
+.sv-opt.picked .sv-mark:after{content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.sv-opt.picked{color:var(--accent);font-weight:600}
+.sv-foot{margin-top:9px;padding-top:7px;border-top:1px solid var(--line);font-size:.74rem;line-height:1.5;color:var(--msg-sub)}
+.sv-foot.answered{color:var(--accent)}
+/* 查看当时的问卷：点梦角答案上的引用小字弹出，可关闭（间距用 margin，兼容 Mate20 夸克） */
+#surveyViewModal .modal-box{gap:0;padding:20px 18px}
+#surveyViewModal .modal-title{margin-bottom:16px;position:relative}
+.sv-kind{position:absolute;right:0;top:50%;transform:translateY(-50%);font-size:.76rem;font-weight:500;color:var(--accent);border:1px solid var(--line);border-radius:10px;padding:2px 9px;white-space:nowrap}
+.survey-view-card{border:1px solid var(--line);border-radius:14px;padding:14px;background:var(--surf)}
+.survey-view-card .sv-q{font-size:.98rem;color:var(--ink)}
+.survey-view-card .sv-opt{color:var(--ink)}
+.survey-view-fallback{font-size:.9rem;color:var(--ink2);line-height:1.6;word-break:break-word}
+#surveyViewModal .modal-actions{margin-top:18px}
 /* 输入中提示：顶栏昵称正下方（同一栏内），黑色小字，昵称位置不动 */
 .typing-tip{position:absolute;top:calc(100% + 3px);left:50%;transform:translateX(-50%);display:none;justify-content:center;align-items:center;color:var(--msg-ink);font-size:.72rem;line-height:1;z-index:2;pointer-events:none;white-space:nowrap}
 /* 三个点绝对定位挂在文字右侧：居中只按文字算，点不影响位置 */
@@ -192,8 +282,8 @@ body.settings-open #chat{visibility:hidden}
 .msg-row.pat.date-row .msg-bubble{color:var(--msg-ink);font-size:.75rem;opacity:.9}
 
 /* 字卡库 */
-.lib-tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--line);flex-shrink:0}
-.lib-tab{flex:1;height:46px;border:none;background:transparent;font-family:inherit;font-size:.92rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
+.lib-tabs{display:flex;background:var(--bg);border-bottom:1px solid var(--line);flex-shrink:0;height:44px}
+.lib-tab{flex:1;height:44px;border:none;background:transparent;font-family:inherit;font-size:.92rem;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}
 .lib-tab.active{color:var(--ink);font-weight:600;border-bottom-color:var(--accent)}
 /* 字卡列表滚动优化：把布局/绘制隔离在这一层，下拉时不会牵动整页重排 */
 .lib-body{flex:1;overflow-y:auto;padding:10px 14px;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:min-content;gap:7px;align-content:start;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;contain:layout paint}
@@ -267,6 +357,31 @@ body.settings-open #chat{visibility:hidden}
 .btn-cancel{background:#f0efe9;color:var(--ink2)}
 .btn-save{background:var(--accent);color:#fff}
 
+/* 问卷框架：题型 / 选项 / 回复时间。间距一律用 margin，避开老内核 flex gap 坑 */
+#surveyModal .modal-box{gap:0;padding:20px 18px}
+#surveyModal .modal-title{margin-bottom:16px}
+.survey-sec + .survey-sec{margin-top:16px}
+.survey-sec-title{display:block;font-size:.82rem;color:#888;margin-bottom:8px}
+.survey-seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.survey-seg-btn{flex:1;height:40px;border:none;border-right:1px solid var(--line);background:var(--card);font-family:inherit;font-size:.9rem;color:var(--ink2);cursor:pointer}
+.survey-seg-btn:last-child{border-right:none}
+.survey-seg-btn.active{background:var(--accent);color:#fff}
+.survey-stem{width:100%;height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px;font-family:inherit;font-size:.9rem;outline:none;color:var(--ink);background:var(--card)}
+/* 选项：单个文本框，一行一个答案 */
+.survey-options{width:100%;min-height:100px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-family:inherit;font-size:.9rem;line-height:1.6;outline:none;color:var(--ink);background:var(--card);resize:vertical}
+.survey-options::placeholder{color:#bbb}
+.survey-tip{font-size:.74rem;color:#999;margin-top:6px;line-height:1.5}
+/* 回复时间：时间框 + 单位 + 随机，同一行（间距用 margin，避开 flex gap） */
+.survey-time-row{display:flex;align-items:center}
+.survey-time-input{width:78px;height:40px;flex-shrink:0;border:1px solid var(--line);border-radius:10px 0 0 10px;padding:0 10px;font-family:inherit;font-size:.9rem;outline:none;color:var(--ink);background:var(--card)}
+.survey-time-input:disabled{background:#f5f4ef;color:#bbb}
+.survey-time-unit{height:40px;flex-shrink:0;border:1px solid var(--line);border-left:none;border-radius:0 10px 10px 0;padding:0 8px;background:var(--card);font-family:inherit;font-size:.9rem;color:var(--ink);outline:none}
+.survey-random-btn{height:40px;flex-shrink:0;margin-left:auto;padding:0 16px;border:1px solid var(--line);border-radius:10px;background:var(--card);font-family:inherit;font-size:.88rem;color:var(--ink2);cursor:pointer}
+.survey-random-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+.survey-hint{font-size:.78rem;color:#999;margin-top:8px;line-height:1.5}
+#surveyModal .modal-actions{margin-top:20px;gap:0}
+#surveyModal .modal-actions .modal-btn + .modal-btn{margin-left:12px}
+
 /* 聊天内设置 - 底部面板 */
 .settings-sheet-mask{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:320;display:none;opacity:0;transition:opacity .22s}
 .settings-sheet-mask.show{display:block;opacity:1}
@@ -286,17 +401,16 @@ body.settings-open #chat{visibility:hidden}
 .overlay-body{flex:1;overflow-y:auto;padding:12px 14px 24px;display:flex;flex-direction:column;gap:14px}
 
 /* ===== 设置中心：顶部工具栏（无气泡，只有背后白色栏 + 分界线） ===== */
-.set-toolbar-wrap{flex-shrink:0;display:flex;padding:8px 14px 10px;background:var(--bg);border-bottom:1px solid var(--line)}
-.set-toolbar{width:100%;display:flex;gap:2px}
-.set-tab{flex:1;display:flex;align-items:center;justify-content:center;height:38px;border-radius:20px;cursor:pointer;transition:background .22s}
+.set-toolbar-wrap{flex-shrink:0;display:flex;align-items:center;height:44px;padding:0 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+.set-toolbar{width:100%;display:flex;gap:2px;height:100%}
+/* 设置功能栏：与字卡库/信箱一致的下方横线模式，高度 44px */
+.set-tab{flex:1;display:flex;align-items:center;justify-content:center;height:100%;border-bottom:2px solid transparent;cursor:pointer;transition:border-color .22s}
 .set-tab-label{
-  font-size:.82rem;color:#555;padding:5px 4px;white-space:nowrap;
-  transition:transform .34s cubic-bezier(.34,1.56,.64,1),color .22s;
+  font-size:.86rem;color:var(--muted);padding:5px 4px;white-space:nowrap;
+  transition:color .22s;
 }
-.set-tab:hover .set-tab-label{transform:translateY(-2px)}
-.set-tab:active .set-tab-label{transform:scale(.9)}
-.set-tab.active{background:#efefef}
-.set-tab.active .set-tab-label{color:#111;font-weight:600}
+.set-tab.active{border-bottom-color:var(--accent)}
+.set-tab.active .set-tab-label{color:var(--ink);font-weight:600}
 .set-stage{flex:1;min-height:0;position:relative}
 .set-panel{position:absolute;top:0;left:0;right:0;bottom:0;display:none}
 .set-panel.show{display:flex;flex-direction:column}
@@ -328,6 +442,10 @@ body.settings-open #chat{visibility:hidden}
 .usage-search:focus{border-color:#c9c2b4}
 .usage-search-tip{font-size:.78rem;color:var(--muted);margin-top:9px;padding-bottom:0}
 .usage-search-tip.none{color:#b06a6a}
+/* 使用大全：首行（标题+搜索）固定不动，长内容在气泡内部上下滑动查看。
+   标题 .usage-hero 在 .fold-body 之外，本来就不随内容滚；这里只让内容区限高自滚。 */
+#usageFoldCard.open .fold-body{grid-template-rows:1fr;max-height:min(50vh,420px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+#usageFoldCard.open .fold-inner{overflow:visible}
 .set-panel .overlay-body{padding-top:14px}
 /* 键盘弹出时保持设置项原高度，不被 flex 压扁成横线；由容器自身滚动 */
 .set-panel .overlay-body > .dream-card,
@@ -443,7 +561,7 @@ body.settings-open #chat{visibility:hidden}
 .mi-id{flex:1;min-width:0}
 .mi-name{font-size:.95rem;font-weight:600;color:#111}
 .mi-time{font-size:.74rem;color:#aaa;margin-top:2px}
-.mi-text{margin:10px 0;line-height:1.55;color:#222;white-space:pre-wrap;word-break:break-word;cursor:pointer;border-radius:8px;transition:opacity .15s}
+.mi-text{margin:10px 0;font-size:.88rem;line-height:1.45;color:#222;white-space:pre-wrap;word-break:break-word;cursor:pointer;border-radius:8px;transition:opacity .15s}
 .mi-text:active{opacity:.6}
 .mail-list{flex:1;overflow-y:auto;padding:10px 14px}
 /* 信件按月份分组：月份标注在气泡上方的分界横线左侧（横线右侧当月封数），每个月一张气泡卡，
@@ -486,14 +604,16 @@ body.settings-open #chat{visibility:hidden}
 .wp-week{font-size:.72rem;color:#777}
 .wp-month{font-size:.72rem;color:#aaa}
 .wp-divider{width:1px;flex-shrink:0;background:#e0ddd4;margin:14px 0}
-.wp-input{flex:1;min-width:0;border:none;background:transparent;outline:none;resize:none;font-family:inherit;font-size:.96rem;line-height:2;color:#222;padding:14px 16px 18px}
+/* 信纸横线：行高与横线间距一致（32px），文字正好一行一行落在横线上；横线随内容一起滚动 */
+.wp-input{flex:1;min-width:0;border:none;outline:none;resize:none;font-family:inherit;font-size:.96rem;line-height:32px;color:#222;padding:32px 16px 18px;background-color:transparent;background-image:repeating-linear-gradient(to bottom,transparent 0,transparent 31px,rgba(150,130,95,.17) 31px,rgba(150,130,95,.17) 32px);background-attachment:local}
 .wp-input::placeholder{color:#c2beb3}
-/* 纸张最下方的新底部栏（无气泡，与顶部栏同色）：夹图/夹表情包气泡按钮 + 寄出 */
-.wp-bottom{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:#e4e4e2;border-top:1px solid #d7d7d5;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
-.wp-attach{display:flex;gap:10px}
-.wp-chip{border:1px solid #cbcbc9;background:#f6f6f4;border-radius:999px;padding:9px 18px;font-family:inherit;font-size:.86rem;color:#333;cursor:pointer}
-.wp-chip:active{background:#e7e7e5}
-.wp-send{border:none;background:#111;color:#fff;font-family:inherit;font-size:.95rem;letter-spacing:.1em;padding:11px 34px;border-radius:16px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+/* 纸张最下方底部栏：白底；夹图/夹表情包为带图标的窄胶囊，寄出为更长的实心气泡 */
+.wp-bottom{flex-shrink:0;display:flex;align-items:center;justify-content:space-between;background:#fff;border-top:1px solid #ececec;padding:10px 16px calc(12px + env(safe-area-inset-bottom))}
+.wp-attach{display:flex;gap:8px}
+.wp-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #d8d8d6;background:#f7f7f5;border-radius:999px;padding:6px 13px;font-family:inherit;font-size:.84rem;color:#333;cursor:pointer;line-height:1.2}
+.wp-chip svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.wp-chip:active{background:#e9e9e7}
+.wp-send{border:1px solid #111;background:#111;color:#fff;font-family:inherit;font-size:.84rem;line-height:1.2;letter-spacing:.14em;padding:6px 44px;border-radius:999px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
 .wp-send:active{opacity:.85}
 /* 未读信件跳转高亮：到达时闪一下，明确信件落在这里 */
 .mail-month-body .mail-item.just-flash{animation:mailFlash 1.1s ease}
@@ -507,9 +627,9 @@ body.settings-open #chat{visibility:hidden}
 /* 没有未读时「0 封未看」默认黑色常显，有未读才变红提醒 */
 .mail-unseen.zero{color:#111;font-weight:400;cursor:default}
 .mail-unseen:not(.zero):active{opacity:.65}
-.mail-head{flex-shrink:0;padding:4px 16px 2px;border-bottom:1px solid var(--line);background:var(--surf)}
-.mail-cats{display:flex}
-.mail-cat{flex:1;background:none;border:none;border-bottom:2px solid transparent;padding:5px 2px 6px;display:flex;align-items:baseline;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;color:#111;transition:border-color .15s}
+.mail-head{flex-shrink:0;height:44px;padding:0 16px;border-bottom:1px solid var(--line);background:var(--surf);display:flex;align-items:center}
+.mail-cats{display:flex;width:100%}
+.mail-cat{flex:1;height:100%;background:none;border:none;border-bottom:2px solid transparent;padding:0 2px;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;font-family:inherit;color:#111;transition:border-color .15s}
 .mail-cat:active{opacity:.6}
 .mail-cat.active{border-bottom-color:#111}
 .mail-cat.active .mail-cat-label{font-weight:600}
@@ -569,6 +689,8 @@ body.settings-open #chat{visibility:hidden}
 .sticker-tab{flex:1;border:none;background:#f2f1ec;border-radius:12px;padding:9px;font-family:inherit;font-size:.88rem;color:#777;cursor:pointer;transition:background .15s,color .15s}
 .sticker-tab.active{background:var(--accent);color:#fff}
 .sticker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;min-height:80px;align-content:start}
+/* 颜文字按三组一行（表情包仍四列） */
+.sticker-grid.kaomoji{grid-template-columns:repeat(3,1fr)}
 .sticker-item{border:1px solid var(--line);background:var(--surf);border-radius:12px;min-height:56px;padding:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;transition:transform .1s,background .15s}
 .sticker-item:active{transform:scale(.94);background:#f2f1ec}
 .sticker-item img{width:100%;height:56px;object-fit:contain}
@@ -666,12 +788,15 @@ body.kbd-open .func-box{visibility:hidden;pointer-events:none}
 .quote-bar .q-text{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .quote-bar .q-cancel{border:none;background:none;color:#999;font-size:1.05rem;line-height:1;cursor:pointer;padding:0 2px;flex-shrink:0}
 /* 气泡内的引用块 */
-.msg-quote{font-size:.72rem;color:var(--msg-sub);line-height:1.35;border-left:2px solid rgba(130,140,155,.35);padding:1px 0 1px 7px;margin:0 0 5px;word-break:break-word;max-height:3.4em;overflow:hidden;user-select:none}
+.msg-quote{font-size:.72rem;color:var(--msg-sub);line-height:1.35;border-left:2px solid rgba(130,140,155,.35);padding:1px 0 1px 7px;margin:0 0 5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;user-select:none;cursor:pointer}
+.msg-quote[data-qmid]:active{opacity:.55}
+@keyframes quoteFlash{0%,100%{box-shadow:var(--shadow)}25%,75%{box-shadow:0 0 0 3px rgba(107,126,224,.55),var(--shadow)}}
+.msg-row.q-flash .msg-bubble{animation:quoteFlash 1.15s ease}
 /* 长按气泡：上方浮出的复制/引用/撤回图标条（纯白不透、高度约原来一半） */
 .msg-act-bar{position:absolute;bottom:calc(100% + 5px);left:50px;display:flex;gap:1px;background:#fff;border:1px solid #e6e3dc;border-radius:9px;padding:2px 3px;box-shadow:0 4px 16px rgba(40,35,25,.18);z-index:6;transform:translateY(4px);opacity:0;pointer-events:none;transition:transform .16s,opacity .16s}
 .msg-act-bar.show{transform:translateY(0);opacity:1;pointer-events:auto}
 .msg-row.me .msg-act-bar{left:auto;right:50px}
-.msg-act{display:flex;flex-direction:row;align-items:center;justify-content:center;border:none;background:none;padding:2px 6px;border-radius:7px;font-family:inherit;font-size:.62rem;color:var(--ink2);cursor:pointer;white-space:nowrap}
+.msg-act{display:flex;flex-direction:row;align-items:center;justify-content:center;border:none;background:none;padding:2px 6px;border-radius:7px;font-family:inherit;font-size:.62rem;color:#111;cursor:pointer;white-space:nowrap}
 .msg-act span{display:none}
 .msg-act:active{background:rgba(0,0,0,.06)}
 .msg-act svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
@@ -680,7 +805,7 @@ body.kbd-open .func-box{visibility:hidden;pointer-events:none}
 
 /* ===== 壁纸美化：整站背景 + 通透度 ===== */
 /* 通透度越高，压在壁纸上的白纱越薄：100% = 壁纸原样，0% = 几乎被白色盖住 */
-body.has-wallpaper{background-image:linear-gradient(rgba(255,255,255,var(--wall-veil,.27)),rgba(255,255,255,var(--wall-veil,.27))),var(--wall);background-size:cover;background-position:center;background-repeat:no-repeat;background-attachment:fixed}
+body.has-wallpaper{background-image:linear-gradient(rgba(255,255,255,var(--wall-veil,.27)),rgba(255,255,255,var(--wall-veil,.27))),var(--wall);background-size:cover;background-position:center;background-repeat:no-repeat}
 body.has-wallpaper .screen,body.has-wallpaper .home-screen,body.has-wallpaper .overlay-page{background:transparent}
 body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallpaper .chat-footer,body.has-wallpaper .lib-tabs,body.has-wallpaper .lib-group-bar,body.has-wallpaper .lib-groups,body.has-wallpaper .lib-search-bar,body.has-wallpaper .lib-batch-bar{background:rgba(255,255,255,.66);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 /* 安卓/华为机型上 backdrop-filter 会让字卡库下拉明显掉帧，改用近乎实底，视觉接近但滚动顺滑 */
@@ -737,8 +862,8 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
   <div class="chat-body" id="chatBody"></div>
   <div class="chat-footer">
     <div class="quote-bar" id="quoteBar" hidden><span class="q-text" id="quoteText"></span><button class="q-cancel" id="quoteCancel">×</button></div>
+    <button class="emoji-btn survey-btn" id="surveyBtn" title="发起问卷"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.35 9.4a2.65 2.65 0 1 1 3.62 2.45c-.66.27-1.02.85-1.02 1.56v.24"/><circle cx="12" cy="17.15" r="1.02" fill="currentColor" stroke="none"/></svg></button>
     <button class="emoji-btn" id="emojiBtn" title="表情包 / 颜文字"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/></svg></button>
-    <button class="emoji-btn survey-btn" id="surveyBtn" title="问卷（功能待完善）"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.35 9.4a2.65 2.65 0 1 1 3.62 2.45c-.66.27-1.02.85-1.02 1.56v.24"/><circle cx="12" cy="17.15" r="1.02" fill="currentColor" stroke="none"/></svg></button>
     <input type="text" class="chat-input" id="chatInput" placeholder="输入消息…">
     <button class="send-btn" id="sendBtn"><svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
   </div>
@@ -807,6 +932,7 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
 <!-- ===== 设置中心（新页面，顶部工具栏切换） ===== -->
 <div class="overlay-page settings-hub" id="settingsHub">
   <div class="chat-nav">
+    <div class="nav-back" id="setBack" title="返回"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></div>
     <div class="nav-center"><div class="nav-nickname">设置</div></div>
     <div class="nav-right"></div>
   </div>
@@ -1005,16 +1131,16 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
           <p class="usage-p"><span class="usage-n">重叠头像</span>显示你与联系人的头像，取自聊天页 ⋯ 设置里的「形象」，未设置时显示虚线占位；直接点这对头像就能进形象设置。头像和签名只在主页出现（刚打开、或从聊天退回主页时），进字卡库、朋友圈、信箱、设置时整块收起，背景只剩下壁纸。</p>
           <p class="usage-p"><span class="usage-n">一句话签名</span>点中间输入框写一句话，边打边存，回到主页还在。</p>
           <p class="usage-p"><span class="usage-n">底部功能栏</span>聊天 / 字卡库 / 朋友圈 / 信箱，最右侧齿轮就是设置。两个设置入口分工：主页齿轮进来看「使用大全」；头像昵称、聊天、通话、记录这些功能设置，在聊天页右上角 ⋯ 里。</p>
-          <p class="usage-p"><span class="usage-n">页面切换</span>字卡库、朋友圈、信箱、设置四个页面顶部没有返回键，底部工具栏常驻（包括设置页底部），点工具栏图标即可互相切换或去聊天页；也可以左右滑动切换，顺序是 字卡库 → 朋友圈 → 信箱 → 设置。字卡库内容区左右滑动可切「字卡 / 颜文字 / 表情包 / 拍一拍」，信箱列表左右滑动可切「TA的来信 / 我的写信 / TA的回信」。去主页：工具栏点「聊天」，再点聊天页左上角返回键。</p>
+          <p class="usage-p"><span class="usage-n">页面切换</span>字卡库、朋友圈、信箱三个内容页通过底部工具栏点击切换。其中字卡库和信箱可在顶部栏左右滑动相互切换；朋友圈没有顶部功能栏，不支持滑动切换。滑动不会跳到主页、聊天或设置这些大功能页，设置页也不支持滑动。信箱顶部点「TA的来信 / 我的写信 / TA的回信」切换分类，列表区左右滑动也能切。字卡库内容区左右滑动可切「字卡 / 颜文字 / 表情包 / 拍一拍」。从聊天页 ⋯ 进的设置左上角有返回键；从主页齿轮进的设置没有返回键，用底部工具栏切换。</p>
           <p class="usage-p"><span class="usage-n">未读红点</span>聊天有新消息、朋友圈有新动态或新回复、信箱有新邮件或回信时，对应图标右上角会亮红点；打开看过一次就消失，没看完关掉页面，红点下次还在。</p>
           <div class="usage-sec">聊天</div>
           <p class="usage-p"><span class="usage-n">发消息</span>输入后按回车或点发送。TA 会按「聊天页设置 · 聊天」里的节奏和条数回复，回复前输入框上方会出现「TA正在想怎么回你」，后面的三个点会 1 点 → 2 点 → 3 点 → 消失，动态循环直到回复出现。</p>
-          <p class="usage-p"><span class="usage-n">表情与颜文字</span>点输入框左侧的笑脸按钮，从字卡库里挑一个，点一下就发出去。</p>
-          <p class="usage-p"><span class="usage-n">问卷</span>笑脸按钮右边那个「圆圈问号」按钮，功能还在设计中，先占个位。</p>
+          <p class="usage-p"><span class="usage-n">表情与颜文字</span>点输入框左侧的笑脸按钮，从字卡库里挑一个，点一下就发出去；面板里「颜文字」按每组三个一行显示。</p>
+          <p class="usage-p"><span class="usage-n">问卷</span>笑脸按钮左边那个「圆圈问号」按钮，点开发起问卷：先选题型（单选 / 多选），填问题，选项在一个文本框里一行写一个（换行就是下一个答案，至少两项）。回复时间一行三栏：左边填时间、中间选单位秒 / 分钟，或点右边「随机」让 TA 自己挑。点发送后问卷作为一张卡片直接发进聊天：单选 TA 随机挑一项、多选随机挑几项，并按你设的时限（随机则在 3~45 秒内）随机挑一个时刻作答——先显示「TA正在想怎么回你」，到点后卡片上高亮所选项，TA 再发一条「我选：…」的消息；卡片上不显示作答时刻和限时，只高亮所选项。梦角那条「我选：…」上方带一行单行小字「问卷：当时的题目」，点它会弹出「当时的问卷」浮层：标题右侧标注「单选 / 多选」，内容只有问题、全部选项（TA 选的会高亮）和一行「选择了：xxx」，看完点「关闭」即可，不用来回滚动找——隔得再久、聊天刷得再多也能查看。中途关页面也没关系，下次进来到点会自动补答。</p>
           <p class="usage-p"><span class="usage-n">拍一拍</span>点联系人头像弹出拍一拍面板，选一句发出去；面板里可开关「自动转换人称」，把文案里的「我」换成对方昵称。</p>
           <p class="usage-p"><span class="usage-n">来电</span>每条消息后按概率来电，可接听或拒接。接听后点最小化会变成可拖动的小泡泡，跨页面保留，点一下还原；30 秒不接听记作未接来电。</p>
           <p class="usage-p"><span class="usage-n">消息时间</span>头像正下方只显示时刻；每天的第一条消息上方会单独标一行「几月几日」（居中，和拍一拍同一行样式）。朋友圈、信箱的发布时间仍是完整的「几月几日 时:分」。</p>
-          <p class="usage-p"><span class="usage-n">引用与撤回</span>长按消息气泡，气泡上方会浮出「引用」「撤回」两个小图标：「引用」把这条消息挂在输入框上方，回复发出后气泡顶上会带一条引用小字；「撤回」删除这条消息并留一行提示。点气泡以外的空白处或滚动一下，小图标就会收起。设置 · 聊天里的「撤回引用」调 TA 的两个概率：撤回概率 = TA 发完消息后过一会儿自己反悔撤回的概率；引用概率 = TA 回你时把你最近一条原话带在气泡顶上的概率。</p>
+          <p class="usage-p"><span class="usage-n">引用与撤回</span>长按消息气泡，气泡上方会浮出「引用」「撤回」两个小图标：「引用」把这条消息挂在输入框上方，回复发出后气泡顶上会带一条单行省略的引用小字，点这条引用小字可跳回被引用的原消息（原消息会闪一下高亮）；「撤回」删除这条消息并留一行提示。点气泡以外的空白处或滚动一下，小图标就会收起。设置 · 聊天里的「撤回引用」调 TA 的两个概率：撤回概率 = TA 发完消息后过一会儿自己反悔撤回的概率；引用概率 = TA 回你时把你最近一条原话带在气泡顶上的概率。</p>
           <p class="usage-p"><span class="usage-n">离线消息</span>打开「主动联系」后，就算你没开着这个页面，TA 也会照常给你发消息：离开 1 天内最多 5 条，1~3 天每天约 3 条，3~5 天每天 1 条，5~15 天每 2 天 1 条，15~30 天每 5 天 1 条，超过一个月就偶尔冒个泡（3~5 条）。消息会带上你离开期间的真实时间、按时间排进聊天记录，偶尔还有一两条深夜消息；主页聊天图标会亮红点，进聊天页就能看到 TA 在你不在时说了什么。</p>
           <div class="usage-sec">字卡库</div>
           <p class="usage-p"><span class="usage-n">四类内容</span>字卡（文本）、拍一拍、表情包（图片）、颜文字。聊天、来信、拍一拍都从这里取内容。</p>
@@ -1044,9 +1170,9 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
           <p class="usage-p"><span class="usage-n">节奏速度</span>收到消息后等几秒再回，最短到最长之间随机，模拟打字时间。默认最短 2 秒、最长 120 秒，可自行填写，填完自动保存。</p>
           <p class="usage-p"><span class="usage-n">回复次数</span>一轮回复几条，在最少与最多之间随机。</p>
           <p class="usage-p"><span class="usage-n">多样选择</span>三个概率分别决定这条回复是不是拍一拍、表情包、颜文字；都不中就是普通文字。</p>
-          <p class="usage-p"><span class="usage-n">拼卡回复</span>开启后一条消息里拼几段短句，片段之间统一用 / 分隔；「拼卡内·字卡数量」控制最多拼几张字卡，下面两项控制拼卡内部用表情包、颜文字的比例。</p>
+          <p class="usage-p"><span class="usage-n">拼卡回复</span>开启后一条消息里拼几段短句：纯字卡拼字卡时片段之间用 / 分隔；字卡拼了颜文字时不加 /，颜文字位置自由（可能在字卡前、字卡后或插在中间）。「拼卡内·字卡数量」控制最多拼几张字卡，下面两项控制拼卡内部用表情包、颜文字的比例。</p>
           <p class="usage-p"><span class="usage-n">已读不回</span>按概率直接不回复，制造一点真实感，默认关闭。</p>
-          <p class="usage-p"><span class="usage-n">主动联系</span>每隔设定秒数检查一次，按概率主动给你发消息，这类消息的气泡下方会标一行「主动」（与正文同色、字号小一号）；不开就一直等你先说话。</p>
+          <p class="usage-p"><span class="usage-n">主动联系</span>以你最后发的一条消息为起点，满 2 小时你还没发消息就算你「不在线」，之后 TA 会按设定的概率和节奏主动给你留言，气泡下方标一行「主动」（与正文同色、字号小一号）。页面关着、没打开链接也一样计时——再打开时会按真实时间把离开期间的留言补上，像真人一样在你不理它的那段时间里照常找你。留言条数按你"没发消息的总时长"决定：头一两天多一些，越久越克制，很久没联系偶尔冒个泡。你一发新消息就重新计时；不开就一直等你先说话。</p>
           <div class="usage-sec">聊天页设置 · 通话</div>
           <p class="usage-p"><span class="usage-n">联系人来电概率</span>联系人每条消息后按这个概率来电，调到 0 就不会再有来电。</p>
           <p class="usage-p"><span class="usage-n">联系人禁止挂断通话</span>开启后联系人不会主动结束通话，只能由我手动挂断。</p>
@@ -1055,7 +1181,7 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
           <p class="usage-p"><span class="usage-n">消息统计与搜索</span>顶部显示当前聊天总条数，输入关键字可搜出命中的历史消息。</p>
           <p class="usage-p"><span class="usage-n">清空与删除</span>「清空聊天记录」只删对话；「删除TA」会连邮件、朋友圈一起清空，且不会自动补发。聊天记录的导出 / 导入统一在主页设置 · 数据整理里操作，这里不再单独提供。</p>
           <div class="usage-sec">小贴士</div>
-          <p class="usage-p"><span class="usage-n">数据存在哪里</span>所有内容都存在当前浏览器的本地存储里，不上传云端；换浏览器或换设备不会自动带过去。用主页设置里的「数据整理」可以整包导出 / 导入备份：点「导出 JSON」或「导出 TXT」时弹出选择框，勾选要备份的类别（聊天记录、字卡库、朋友圈、邮箱，以及「壁纸·头像·昵称·功能设置」——壁纸、通透度、头像昵称、情侣头像、聊天频率等功能设置都归在这里，默认勾上）；导入的文件会覆盖对应类别的现有数据，设置项导入后立即恢复生效。</p>
+          <p class="usage-p"><span class="usage-n">数据存在哪里</span>所有内容都存在当前浏览器的本地存储里，不上传云端；换浏览器或换设备不会自动带过去。用主页设置里的「数据整理」可以整包导出 / 导入备份：点「导出 JSON」时弹出选择框，勾选要备份的类别（聊天记录、字卡库、朋友圈、邮箱，以及「参数设置」——壁纸、通透度、头像昵称、情侣头像、聊天频率等功能设置都归在这里，默认勾上）；导入的文件会覆盖对应类别的现有数据，设置项导入后立即恢复生效。</p>
           <p class="usage-p"><span class="usage-n">自动保存</span>聊天设置、通话设置、头像与昵称都是改完即时生效并自动保存，不需要按「保存」按钮。</p>
           <p class="usage-p"><span class="usage-n">折叠卡片与开关样式</span>使用大全页里的「声音提醒」「数据整理」是折叠卡片：默认收起只显示标题（与「使用大全」同字号），点标题展开看到具体开关和按钮，再点收起。全局的开关统一是方框打勾样式（勾选后黑底白勾）；界面文字与图标默认黑色。</p>
           </div></div>
@@ -1072,10 +1198,9 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
         <div class="dream-card fold-card" id="foldExpCard">
           <div class="fold-head"><span class="fold-title fold-title-lg">数据整理</span><span class="fold-arrow"></span></div>
           <div class="fold-body"><div class="fold-inner">
-            <div class="dream-note">导出或导入：聊天记录、字卡库、朋友圈、邮箱（JSON / TXT 两种格式，TXT 内容与 JSON 相同），换手机或电脑时备份恢复用。导出时再选择要备份的数据类别（单选或全选）。</div>
+            <div class="dream-note">导出或导入：聊天记录、字卡库、朋友圈、邮箱等（JSON 格式），换手机或电脑时备份恢复用。导出时再选择要备份的数据类别（单选或全选）。</div>
             <div class="exp-btn-row">
               <button class="exp-btn" id="expExportJson" type="button">导出 JSON</button>
-              <button class="exp-btn" id="expExportTxt" type="button">导出 TXT</button>
               <button class="exp-btn" id="expImportBtn" type="button">导入数据</button>
             </div>
             <input type="file" id="expImportFile" accept=".json,.txt" hidden>
@@ -1102,6 +1227,44 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
   <div class="modal-actions"><button class="modal-btn btn-cancel" id="itemCancel">取消</button><button class="modal-btn btn-save" id="itemSave">保存</button></div>
 </div></div>
 
+<!-- 问卷框架：聊天输入栏左侧「圆圈问号」按钮打开 -->
+<div class="modal-mask" id="surveyModal"><div class="modal-box">
+  <div class="modal-title">发起问卷</div>
+  <div class="survey-sec">
+    <span class="survey-sec-title">题型</span>
+    <div class="survey-seg" id="surveyTypeSeg">
+      <button type="button" class="survey-seg-btn active" data-val="single">单选题</button>
+      <button type="button" class="survey-seg-btn" data-val="multi">多选题</button>
+    </div>
+  </div>
+  <div class="survey-sec">
+    <span class="survey-sec-title">问题</span>
+    <input type="text" class="survey-stem" id="surveyStem" maxlength="60" placeholder="输入你想问的问题">
+  </div>
+  <div class="survey-sec">
+    <span class="survey-sec-title">选项（文字标记）</span>
+    <textarea class="survey-options" id="surveyOptions" rows="4" placeholder="每行输入一个选项&#10;例如：&#10;选项一&#10;选项二"></textarea>
+    <div class="survey-tip">一行一个答案，至少两项（换行即为下一个选项）</div>
+  </div>
+  <div class="survey-sec">
+    <span class="survey-sec-title">回复时间</span>
+    <div class="survey-time-row">
+      <input type="number" class="survey-time-input" id="surveyTimeVal" min="1" value="10" inputmode="numeric" placeholder="时间">
+      <select class="survey-time-unit" id="surveyTimeUnit"><option value="sec">秒</option><option value="min">分钟</option></select>
+      <button type="button" class="survey-random-btn" id="surveyRandomBtn">随机</button>
+    </div>
+    <div class="survey-hint" id="surveyTimeHint">填写时间即按所选单位回信；点「随机」则由 TA 随机决定回复时间</div>
+  </div>
+  <div class="modal-actions"><button class="modal-btn btn-cancel" id="surveyCancel">取消</button><button class="modal-btn btn-save" id="surveySend">发送</button></div>
+</div></div>
+
+<!-- 查看当时的问卷：点梦角「我选：…」上方的引用小字打开，看完可关闭 -->
+<div class="modal-mask" id="surveyViewModal"><div class="modal-box">
+  <div class="modal-title">当时的问卷<span class="sv-kind" id="surveyViewKind"></span></div>
+  <div class="survey-view-body" id="surveyViewBody"></div>
+  <div class="modal-actions"><button class="modal-btn btn-save" id="surveyViewClose">关闭</button></div>
+</div></div>
+
 <!-- 导出数据整理：点导出按钮后选择类别（单选或全选） -->
 <div class="modal-mask" id="expSelModal"><div class="modal-box">
   <div class="modal-title">选择导出数据</div>
@@ -1110,7 +1273,7 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
     <label class="export-cat"><input type="checkbox" value="cards" checked><span>字卡库</span></label>
     <label class="export-cat"><input type="checkbox" value="moments" checked><span>朋友圈</span></label>
     <label class="export-cat"><input type="checkbox" value="mail" checked><span>邮箱</span></label>
-    <label class="export-cat"><input type="checkbox" value="settings" checked><span>壁纸·头像·昵称·功能设置</span></label>
+    <label class="export-cat"><input type="checkbox" value="settings" checked><span>参数设置</span></label>
     <label class="export-cat"><input type="checkbox" id="expSelAll" checked><span>全选</span></label>
   </div>
   <div class="modal-actions"><button class="modal-btn btn-cancel" id="expSelCancel">取消</button><button class="modal-btn btn-save" id="expSelOk">导出</button></div>
@@ -1179,8 +1342,8 @@ body.has-wallpaper .set-toolbar-wrap,body.has-wallpaper .chat-nav,body.has-wallp
   </div>
   <div class="wp-bottom">
     <div class="wp-attach">
-      <button class="wp-chip" id="wpImgBtn" type="button">夹图</button>
-      <button class="wp-chip" id="wpStickerBtn" type="button">夹表情包</button>
+      <button class="wp-chip" id="wpImgBtn" type="button"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5L5 20"/></svg>夹图</button>
+      <button class="wp-chip" id="wpStickerBtn" type="button"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="8.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10" r="1.1" fill="currentColor" stroke="none"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/></svg>夹表情包</button>
     </div>
     <button class="wp-send" id="wpSend" type="button">寄出</button>
   </div>
@@ -1429,8 +1592,16 @@ let lastChatH='',lastChatY='',chatViewportRAF=0;
 function syncChatViewport(){
   const vv=window.visualViewport;
   if(!vv||!chat||!chat.classList.contains('show'))return;
-  const h=Math.round(vv.height)+'px';
-  const y=Math.round(Math.max(0,vv.offsetTop||0))+'px';
+  /* 只有真的弹出软键盘（窗口高-可视高 > 100px）时才收缩聊天页，
+     否则一律撑满 100%：桌面预览 / 内嵌容器里 visualViewport 的轻微变化
+     曾导致聊天页被错误压矮、输入栏上方留出一大片空白。 */
+  const kb=Math.max(0,Math.round(window.innerHeight-vv.height));
+  const off=Math.max(0,vv.offsetTop||0);
+  /* 两种弹键盘方式：① 布局视口不缩、可视视口变矮(kb>100)；② 可视视口整体下移(off>80)。
+     后者若不把聊天页往下挪 off，输入栏下方就会露出一大片空白。 */
+  const realKeyboard=kb>100||off>80;
+  const h=realKeyboard?Math.round(vv.height/4)*4+'px':'100%';
+  const y=realKeyboard?Math.round(off/4)*4+'px':'0px';
   if(h!==lastChatH){lastChatH=h;chat.style.setProperty('--chat-h',h)}
   if(y!==lastChatY){lastChatY=y;chat.style.setProperty('--chat-y',y)}
 }
@@ -1454,17 +1625,18 @@ function showMoments(){seedMomentsIfEmpty();runMomentPlan();showPanel('moments')
 function showMail(){seedMailsIfEmpty();mailFilter='letter';showPanel('mail');renderMails();setAppDot('mail',false)}
 
 /* ===== 左右滑动切换 =====
-   应用级（字卡库 → 朋友圈 → 信箱 → 设置）：字卡库/朋友圈/信箱在顶部栏区域滑动，设置整页可滑；
-   内容级：信箱列表横滑切「TA的来信 / 我的写信 / TA的回信」，字卡库内容横滑切「字卡 / 颜文字 / 表情包 / 拍一拍」 */
+   应用级只在字卡库 ↔ 信箱两个有顶部栏的内容页之间循环（顶部栏区域滑动）；
+   朋友圈没有顶部功能栏，不参与横滑切换（整页也不绑定）；
+   不含设置/主页/聊天，滑动永远不会跳到主页大功能；设置整页不绑定横滑。
+   内容级：信箱列表横滑切「TA的来信 / 我的写信 / TA的回信」，字卡库内容横滑切「字卡 / 颜文字 / 表情包 / 拍一拍」。 */
 function swipeToApp(name){
-  if(name==='settings'){openSettings('usage','home');return}
   if(document.body.classList.contains('settings-open')){document.body.classList.remove('settings-open');settingsHub.classList.remove('show');setDock(null)}
   showPanel(name);
   if(name==='cardLib'){groupEditor=null;closeLibSearch();renderLib()}
   else if(name==='moments'){seedMomentsIfEmpty();runMomentPlan();renderMoments();updateMomentsNotify()}
   else if(name==='mail'){seedMailsIfEmpty();renderMails();setAppDot('mail',false)}
 }
-const APP_ORDER=['cardLib','moments','mail','settings'];
+const APP_ORDER=['cardLib','mail'];
 function appSwipe(from,dir){
   const i=APP_ORDER.indexOf(from),n=i+(dir==='left'?1:-1);
   if(n<0||n>=APP_ORDER.length)return;   /* 到头不再滑 */
@@ -1485,12 +1657,12 @@ function bindHSwipe(el,onSwipe,zoneSel){
     onSwipe(dx<0?'left':'right');
   },{passive:true});
 }
-/* 应用级：三个面板在顶部栏横滑，设置页整页横滑 */
+/* 应用级横滑：只在字卡库 ↔ 信箱两个有顶部栏的内容页之间循环；
+   朋友圈没有顶部功能栏，不绑定横滑；不把设置/主页/聊天纳入手势循环，避免误触跳到大功能页。 */
 bindHSwipe(cardLib,d=>appSwipe('cardLib',d),'.chat-nav');
-bindHSwipe(moments,d=>appSwipe('moments',d),null);
 bindHSwipe(mail,d=>appSwipe('mail',d),'.chat-nav');
-bindHSwipe(settingsHub,d=>appSwipe('settings',d),null);
-/* 信箱三分类横滑 */
+/* 设置页不绑定横滑（曾经滑一下跳到邮箱的 bug 就是它引起） */
+/* 信箱三分类横滑：页面内部切换，与外层页面切换互不干扰 */
 const MAIL_ORDER=['letter','mine','reply'];
 function cycleMailFilter(dir){
   if(!mailFilter)mailFilter=dir==='left'?'letter':'reply';
@@ -1621,8 +1793,36 @@ function setBubbleText(bub,raw,type,side){
     bub.querySelector('span').textContent=s.slice(2);
   }else bub.textContent=type==='pat'?convertPatText(s,side):s;
 }
-function renderMsgRow(side,text,type,time,flag,day,quote){
+/* 问卷卡片渲染：text 为结构化问卷对象 {q,options,type,mode,pick,pickedAt} */
+function renderSurveyCard(bub,s){
+  if(!s||typeof s!=='object'){bub.textContent='[问卷]';return}
+  const kind=s.type==='multi'?'多选':'单选';
+  const head=document.createElement('div');head.className='sv-head';
+  head.textContent='📋 问卷 · '+kind;
+  const q=document.createElement('div');q.className='sv-q';q.textContent=s.q||'';
+  const opts=document.createElement('div');opts.className='sv-opts';
+  const picked=Array.isArray(s.pick)?s.pick:[];
+  (s.options||[]).forEach((o,i)=>{
+    const row=document.createElement('div');
+    row.className='sv-opt'+(picked.indexOf(i)>=0?' picked':'');
+    const mark=document.createElement('span');mark.className='sv-mark'+(s.type==='multi'?' multi':'');
+    const label=document.createElement('span');label.textContent=o;
+    row.appendChild(mark);row.appendChild(label);opts.appendChild(row);
+  });
+  const foot=document.createElement('div');
+  const answered=picked.length>0;
+  foot.className='sv-foot'+(answered?' answered':'');
+  if(answered){
+    const names=picked.map(i=>s.options[i]).filter(Boolean).join('、');
+    foot.textContent='TA 选择了：'+names;
+  }else{
+    foot.textContent='等待 TA 作答…';
+  }
+  bub.appendChild(head);bub.appendChild(q);bub.appendChild(opts);bub.appendChild(foot);
+}
+function renderMsgRow(side,text,type,time,flag,day,quote,mid,quoteMid){
   const row=document.createElement('div');
+  if(mid)row.dataset.mid=mid;
   const stamp=splitStamp(time);
   insertDateRow(day||stamp.day);
   const centered=type==='pat'||type==='system';
@@ -1630,11 +1830,12 @@ function renderMsgRow(side,text,type,time,flag,day,quote){
   if(!centered){
     const sp=side==='me'?myProfile:profile,fb=side==='me'?'我':(profile.nickname.charAt(0)||'梦');
     const isPin=type==='pincard'&&Array.isArray(text);
-    const isImg=!isPin&&String(text).startsWith('data:image');
+    const isSurvey=type==='survey'&&text&&typeof text==='object'&&!Array.isArray(text);
+    const isImg=!isPin&&!isSurvey&&String(text).startsWith('data:image');
     /* 头像竖排：头像在上，时间戳在下（无时间则不显示） */
     const timeEl=stamp.hm?'<div class="msg-time">'+escAttr(stamp.hm)+'</div>':'';
     const sideEl='<div class="msg-side"><div class="msg-avatar" data-side="'+side+'">'+avatarHTML(sp.avatar,fb)+'</div>'+timeEl+'</div>';
-    const bubbleEl='<div class="msg-bubble'+(isImg?' emoji-bubble':'')+(isPin?' pincard-bubble':'')+'"></div>';
+    const bubbleEl='<div class="msg-bubble'+(isImg?' emoji-bubble':'')+(isPin?' pincard-bubble':'')+(isSurvey?' survey-bubble':'')+'"></div>';
     /* 主动联系（TA 自己发来的）在气泡下方加一行浅色小字标注 */
     row.innerHTML=sideEl+(flag==='auto'
       ? '<div class="msg-auto-wrap">'+bubbleEl+'<div class="msg-tag">主动</div></div>'
@@ -1654,11 +1855,15 @@ function renderMsgRow(side,text,type,time,flag,day,quote){
         const tag=document.createElement('div');tag.className='msg-tag';tag.textContent='主动';wrap.appendChild(tag);
       }
     }
-    if(isPin){
-      /* 拼卡：所有片段之间统一用 / 分隔。此前只有「纯字卡拼字卡」才插分隔符，
-         混了表情包/颜文字就不显示 /，看起来像「有时候显示有时候没有」。 */
+    if(isSurvey){
+      renderSurveyCard(bub,text);
+    }
+    else if(isPin){
+      /* 拼卡分隔符：只有「字卡拼字卡」才在片段之间插 /；
+         字卡拼颜文字（含颜文字片段）不加 /，颜文字位置随机（可在字卡前/中/后）。 */
+      const noSep=text.some(p=>p&&p.k==='k');
       text.forEach((p,i)=>{
-        if(i>0){const sep=document.createElement('span');sep.className='pin-sep';sep.textContent='/';bub.appendChild(sep)}
+        if(i>0&&!noSep){const sep=document.createElement('span');sep.className='pin-sep';sep.textContent='/';bub.appendChild(sep)}
         if(p.t==='img'){
           const im=document.createElement('img');im.className='pin-inline-img';im.src=p.v;im.alt='表情';bub.appendChild(im);
         }else{
@@ -1668,8 +1873,17 @@ function renderMsgRow(side,text,type,time,flag,day,quote){
     }
     else if(isImg)bub.innerHTML='<img src="'+text+'" alt="表情">';
     else bub.textContent=text;
-    /* 引用块：气泡顶部一条竖线小字，显示被引用的原话 */
-    if(quote){const q=document.createElement('div');q.className='msg-quote';q.textContent=quote;bub.insertBefore(q,bub.firstChild)}
+    /* 引用块：气泡顶部一条竖线小字（单行省略），显示被引用的原话；点它跳到原消息 */
+    if(quote){
+      const q=document.createElement('div');q.className='msg-quote';q.textContent=quote;
+      if(quoteMid){
+        q.dataset.qmid=quoteMid;
+        let src=null;
+        for(let i=0;i<history.length;i++){if(history[i]&&history[i].mid===quoteMid){src=history[i];break}}
+        q.title=(src&&src.type==='survey')?'点击查看当时的问卷':'点击跳转到原消息';
+      }
+      bub.insertBefore(q,bub.firstChild);
+    }
     /* 点联系人头像 = 我拍一拍，弹出选择面板（以「我」的身份发送） */
     if(side==='other')row.querySelector('.msg-avatar').onclick=()=>openPatPanel('me');
   }else{
@@ -1681,15 +1895,32 @@ function renderMsgRow(side,text,type,time,flag,day,quote){
   }
   chatBody.appendChild(row);chatBody.scrollTop=chatBody.scrollHeight;
 }
-function addMsg(side,text,type,flag,quote){
+function chatMid(m){if(!m.mid)m.mid='m'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);return m.mid}
+function addMsg(side,text,type,flag,quote,quoteMid){
   if(Array.isArray(text)){if(!text.length)return}
   else{if(!String(text).trim())return}
   type=type||'';flag=flag||'';
   const rec={side,text,type,time:nowTime(),day:nowDay()};
+  chatMid(rec);                        /* 每条消息一个稳定 id，供引用跳转定位 */
   if(flag)rec.flag=flag;              /* auto = TA 主动联系发来的 */
   if(quote)rec.quote=quote;           /* 引用的原消息（我的或 TA 的） */
+  if(quoteMid)rec.quoteMid=quoteMid;  /* 被引用消息的 id */
   history.push(rec);saveHistory();
-  renderMsgRow(side,text,type,rec.time,flag,rec.day,rec.quote);
+  /* 「我不在线」基准：以我最后发的一条消息为起点，满 2 小时后 TA 开始自动留言。
+     关掉页面期间也算（用真实时间戳，重新打开时按时间差补发），不受页面开合影响。 */
+  if(side==='me'&&type!=='system'){
+    const at=String(Date.now());
+    try{
+      localStorage.setItem('ynLastMyMsg',at);  /* 锚点：我最后发消息的时间 */
+      localStorage.setItem('ynAutoFrom',at);   /* 补发时间戳的起点 */
+      localStorage.setItem('ynAutoCount','0'); /* 新一轮沉默期：自动留言计数清零 */
+    }catch(e){}
+  }
+  /* 定时器在线时发出的自动留言也计入本轮，供补发判断还差几条，避免重复 */
+  if(side==='other'&&flag==='auto'){
+    try{localStorage.setItem('ynAutoCount',String((Number(localStorage.getItem('ynAutoCount'))||0)+1))}catch(e){}
+  }
+  renderMsgRow(side,text,type,rec.time,flag,rec.day,rec.quote,rec.mid,rec.quoteMid);
   if(type!=='system')playMsgSound(); /* 我发消息 / 收到联系人消息都响；系统提示不响 */
   /* 主页红点：没在聊天页时收到联系人的新消息，聊天图标亮红点；已打开则不算未读 */
   if(side==='other'&&type!=='system'&&!chatVisible())setAppDot('chat',true);
@@ -1709,10 +1940,14 @@ function maybeRecallLater(rec){
 }
 /* 消息转纯文本（拼卡消息的各片段拼接），供搜索/导出使用 */
 function msgPlainText(m){
+  if(m&&m.type==='survey'&&m.text&&typeof m.text==='object'){
+    const s=m.text,picked=Array.isArray(s.pick)?s.pick.map(i=>s.options[i]).filter(Boolean).join('、'):'';
+    return '[问卷] '+(s.q||'')+'（'+(s.options||[]).join(' / ')+'）'+(picked?' → TA选：'+picked:'');
+  }
   if(Array.isArray(m.text))return m.text.map(p=>p.v).join('');
   return String(m.text);
 }
-function restoreHistory(){lastChatDay='';history.forEach(m=>renderMsgRow(m.side,m.text,m.type,m.time,m.flag,m.day,m.quote));chatBody.scrollTop=chatBody.scrollHeight}
+function restoreHistory(){lastChatDay='';history.forEach(m=>{if(!m.mid)chatMid(m);renderMsgRow(m.side,m.text,m.type,m.time,m.flag,m.day,m.quote,m.mid,m.quoteMid)});chatBody.scrollTop=chatBody.scrollHeight}
 function refreshAvatars(){chatBody.querySelectorAll('.msg-row:not(.pat)').forEach(r=>{const s=r.querySelector('.msg-avatar').dataset.side,sp=s==='me'?myProfile:profile;r.querySelector('.msg-avatar').innerHTML=avatarHTML(sp.avatar,s==='me'?'我':(profile.nickname.charAt(0)||'梦'))});if(typeof renderHomeWidget==='function')renderHomeWidget()}
 function refreshPatTexts(){chatBody.querySelectorAll('.msg-row.pat:not(.date-row)').forEach(r=>{setBubbleText(r.querySelector('.msg-bubble'),r.dataset.raw||'',r.dataset.type,r.dataset.side)})}
 
@@ -1742,6 +1977,8 @@ let stickerPickHook=null;
 function openStickerPick(cb){
   stickerCat='emoji';
   document.querySelectorAll('.sticker-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat==='emoji'));
+  /* 写信页「夹表情包」只取字卡库里的表情包：藏掉颜文字标签，打开即为表情包库 */
+  const tabs=document.querySelector('.sticker-tabs');if(tabs)tabs.style.display='none';
   renderStickerGrid();stickerPickHook=cb;stickerMask.classList.add('show');
   /* 写信页(z355)上打开时把面板临时提到最上层，避免被写信页盖住 */
   stickerMask.style.zIndex='360';
@@ -1749,6 +1986,8 @@ function openStickerPick(cb){
 function renderStickerGrid(){
   if(!stickerGrid)return;
   stickerGrid.innerHTML='';
+  /* 颜文字按三组一行，表情包仍四列 */
+  stickerGrid.classList.toggle('kaomoji',stickerCat==='kaomoji');
   const list=(cards[stickerCat]||[]).filter(v=>v&&String(v).trim());
   if(!list.length){
     const e=document.createElement('div');e.className='sticker-empty';
@@ -1774,6 +2013,7 @@ function renderStickerGrid(){
 }
 if(emojiBtn)emojiBtn.onclick=()=>{
   stickerCat='emoji';
+  const tabs=document.querySelector('.sticker-tabs');if(tabs)tabs.style.display='';
   document.querySelectorAll('.sticker-tab').forEach(t=>t.classList.toggle('active',t.dataset.cat===stickerCat));
   renderStickerGrid();stickerMask.classList.add('show');stickerMask.style.zIndex='';
 };
@@ -1786,9 +2026,184 @@ document.querySelectorAll('.sticker-tab').forEach(t=>{
 });
 if(stickerMask)stickerMask.onclick=e=>{if(e.target===stickerMask)stickerMask.classList.remove('show')};
 
-/* 问卷入口：先占位，后续在这里接入出题 / 答题流程（TODO: 问卷功能待完善） */
+/* 问卷入口：聊天输入栏左侧「圆圈问号」按钮 → 打开问卷框架弹窗 */
 const surveyBtn=$('surveyBtn');
-if(surveyBtn)surveyBtn.onclick=()=>showSaveToast('问卷功能还在设计中～');
+(function(){
+  const mask=$('surveyModal');
+  if(!mask)return;
+  const stem=$('surveyStem'),optionsEl=$('surveyOptions');
+  const typeSeg=$('surveyTypeSeg'),randomBtn=$('surveyRandomBtn');
+  const timeHint=$('surveyTimeHint'),timeVal=$('surveyTimeVal'),timeUnit=$('surveyTimeUnit');
+  let surveyType='single',randomMode=false;
+
+  function bindSeg(seg,onPick){
+    const btns=seg.querySelectorAll('.survey-seg-btn');
+    for(let i=0;i<btns.length;i++){
+      btns[i].onclick=()=>{
+        for(let j=0;j<btns.length;j++)btns[j].classList.toggle('active',btns[j]===btns[i]);
+        onPick(btns[i].dataset.val);
+      };
+    }
+  }
+  function selectFirst(seg){
+    const btns=seg.querySelectorAll('.survey-seg-btn');
+    for(let i=0;i<btns.length;i++)btns[i].classList.toggle('active',i===0);
+  }
+  function setRandom(on){
+    randomMode=on;
+    randomBtn.classList.toggle('active',on);
+    timeVal.disabled=on;timeUnit.disabled=on;
+    timeHint.textContent=on
+      ? '已选随机：由 TA 随机决定回复时间'
+      : '填写时间即按所选单位回信；点「随机」则由 TA 随机决定回复时间';
+  }
+  function openSurvey(){
+    surveyType='single';
+    stem.value='';optionsEl.value='';
+    selectFirst(typeSeg);
+    setRandom(false);
+    timeVal.value='10';timeUnit.value='sec';
+    mask.classList.add('show');
+    try{syncModalViewport()}catch(e){}
+  }
+  function closeSurvey(){mask.classList.remove('show')}
+
+  bindSeg(typeSeg,v=>{surveyType=v});
+  randomBtn.onclick=()=>setRandom(!randomMode);
+  $('surveyCancel').onclick=closeSurvey;
+  mask.onclick=e=>{if(e.target===mask)closeSurvey()};
+  $('surveySend').onclick=()=>{
+    const question=stem.value.trim();
+    if(!question){showSaveToast('请先填写问题');return}
+    const options=optionsEl.value.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    if(options.length<2){showSaveToast('请至少填写两个选项（每行一个）');return}
+    const replyTime=randomMode
+      ? {mode:'random'}
+      : {mode:'custom',value:Number(timeVal.value)||1,unit:timeUnit.value};
+    /* 直接发到聊天：结构化问卷消息 + TA 限时随机作答 */
+    const data={type:surveyType,q:question,options:options,mode:replyTime.mode,
+                value:replyTime.value,unit:replyTime.unit};
+    closeSurvey();
+    launchSurvey(data);
+  };
+
+  if(surveyBtn)surveyBtn.onclick=openSurvey;
+})();
+
+/* ===== 问卷：发送 + TA 限时随机作答 ===== */
+/* 计算这条问卷的作答时刻距离发送时刻的毫秒数：
+   自选 = 在设定时限内随机取一点；随机 = TA 自己在 3~45 秒里随机挑一点。 */
+function surveyReplyDelay(s){
+  let limit;
+  if(s.mode==='custom'){
+    const v=Math.max(1,Number(s.value)||1);
+    limit=v*(s.unit==='min'?60000:1000);
+  }else{
+    limit=(3+Math.floor(Math.random()*43))*1000; /* 3~45 秒 */
+  }
+  const minMs=Math.min(800,limit);
+  return Math.round(minMs+Math.random()*Math.max(0,limit-minMs));
+}
+/* 把问卷发进聊天（作为我发的消息），并写下绝对作答时刻，供定时器与刷新后补答共用 */
+function launchSurvey(data){
+  const rec=addMsg('me',data,'survey');
+  if(!rec)return;
+  rec.text.replyAt=Date.now()+surveyReplyDelay(rec.text);
+  saveHistory();
+  scheduleSurveyReplies();
+  showSaveToast('问卷已发出，等 TA 作答');
+}
+/* TA 对一条问卷作答：随机选题 → 高亮卡片 → 发一条选择消息 */
+function answerSurvey(rec){
+  const s=rec&&rec.text;
+  if(!s||typeof s!=='object'||Array.isArray(s.pick))return; /* 已作答 */
+  const opts=s.options||[];if(!opts.length)return;
+  let picks=[];
+  if(s.type==='multi'){
+    const count=1+Math.floor(Math.random()*opts.length); /* 1~全部 */
+    const pool=opts.map((_,i)=>i);
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=pool[i];pool[i]=pool[j];pool[j]=t}
+    picks=pool.slice(0,count).sort((a,b)=>a-b);
+  }else{
+    picks=[Math.floor(Math.random()*opts.length)];
+  }
+  s.pick=picks;s.pickedAt=nowTime();
+  saveHistory();
+  hideTyping();
+  /* 就地刷新这张卡片的高亮与「TA 选择了」 */
+  if(rec.mid){
+    const rows=Array.prototype.slice.call(chatBody.querySelectorAll('.msg-row'));
+    for(let i=0;i<rows.length;i++){
+      if(rows[i].dataset.mid===rec.mid){const bub=rows[i].querySelector('.msg-bubble');if(bub){bub.innerHTML='';renderSurveyCard(bub,s)}break}
+    }
+  }
+  const names=picks.map(i=>opts[i]).join('、');
+  /* 带上当时的问题与问卷消息 id：点答案气泡顶部的引用小字，弹出浮层看当时的问卷，
+     问卷正文从原消息里取，隔再久、聊天刷再多也能查看。 */
+  let q=s.q||'问卷';
+  if(q.length>50)q=q.slice(0,50)+'…';
+  addMsg('other','我选：'+names,'','','问卷：'+q,rec.mid);
+}
+/* 给所有未作答问卷排定时器：到点作答，未到点按剩余时间排。
+   用 mid 去重，避免初始化/切回前台时重复排程导致重复答复。 */
+const surveyScheduled=new Set();
+function scheduleSurveyReplies(){
+  if(!Array.isArray(history))return;
+  history.forEach(m=>{
+    if(!m||m.type!=='survey'||!m.text||typeof m.text!=='object'||Array.isArray(m.text.pick))return;
+    const mid=m.mid||chatMid(m);
+    if(surveyScheduled.has(mid))return;
+    if(!m.text.replyAt){m.text.replyAt=Date.now()+surveyReplyDelay(m.text);saveHistory()}
+    const remain=m.text.replyAt-Date.now();
+    surveyScheduled.add(mid);
+    showTyping();
+    setTimeout(()=>{surveyScheduled.delete(mid);answerSurvey(m)},Math.max(0,remain));
+  });
+}
+
+/* 查看当时的问卷：点梦角答案上的引用小字，弹浮层展示原问卷，看完可关闭。
+   问卷正文按 mid 从 history 取，不在聊天里滚动定位；原消息万一不在了就退回显示引用文字。 */
+function openSurveyView(mid,fallback){
+  const box=$('surveyViewBody');if(!box)return;
+  box.innerHTML='';
+  let src=null;
+  for(let i=0;i<history.length;i++){if(history[i]&&history[i].mid===mid){src=history[i];break}}
+  const s=src&&src.type==='survey'?src.text:null;
+  const kindEl=$('surveyViewKind');
+  if(kindEl)kindEl.textContent='';
+  if(s&&typeof s==='object'&&!Array.isArray(s)){
+    if(kindEl)kindEl.textContent=s.type==='multi'?'多选':'单选';
+    /* 浮层只显示：问题 + 选项（所选高亮）+ 选择了哪一个，不再重复题型行 */
+    const card=document.createElement('div');card.className='survey-view-card';
+    const q=document.createElement('div');q.className='sv-q';q.textContent=s.q||'';
+    const opts=document.createElement('div');opts.className='sv-opts';
+    const picked=Array.isArray(s.pick)?s.pick:[];
+    (s.options||[]).forEach((o,i)=>{
+      const row=document.createElement('div');
+      row.className='sv-opt'+(picked.indexOf(i)>=0?' picked':'');
+      const mark=document.createElement('span');mark.className='sv-mark'+(s.type==='multi'?' multi':'');
+      const label=document.createElement('span');label.textContent=o;
+      row.appendChild(mark);row.appendChild(label);opts.appendChild(row);
+    });
+    const foot=document.createElement('div');foot.className='sv-foot answered';
+    foot.textContent='选择了：'+(picked.map(i=>s.options[i]).filter(Boolean).join('、')||'—');
+    card.appendChild(q);card.appendChild(opts);card.appendChild(foot);
+    box.appendChild(card);
+  }else{
+    const p=document.createElement('div');p.className='survey-view-fallback';
+    p.textContent=fallback||'原问卷已不存在';
+    box.appendChild(p);
+  }
+  const mask=$('surveyViewModal');
+  mask.classList.add('show');
+  try{syncModalViewport()}catch(e){}
+}
+(function bindSurveyView(){
+  const mask=$('surveyViewModal');if(!mask)return;
+  const close=()=>mask.classList.remove('show');
+  const btn=$('surveyViewClose');if(btn)btn.onclick=close;
+  mask.onclick=e=>{if(e.target===mask)close()};
+})();
 
 function collectReplyPool(){
   const texts=[],pats=[],emojis=[],kaomojis=[];
@@ -1824,10 +2239,12 @@ function buildPinCard(){
     for(let i=0;i<n;i++)parts.push({t:'text',k:'z',v:rand(texts)});
     const e=rand(emojis);parts.push({t:String(e).startsWith('data:image')?'img':'text',k:'e',v:e});
   }else if(kaomojis.length&&roll<pinEmojiPct+pinKaomojiPct){
-    /* 字卡拼颜文字：字卡若干 + 颜文字恰好1个 */
+    /* 字卡拼颜文字：颜文字恰好1个，位置自由——随机插到字卡前 / 中 / 后任意处 */
     const n=pickCount();
     for(let i=0;i<n;i++)parts.push({t:'text',k:'z',v:rand(texts)});
-    parts.push({t:'text',k:'k',v:rand(kaomojis)});
+    const kp={t:'text',k:'k',v:rand(kaomojis)};
+    const pos=Math.floor(Math.random()*(parts.length+1)); /* 0..parts.length 任意位置 */
+    parts.splice(pos,0,kp);
   }else{
     /* 字卡拼字卡：数量在 0~上限 之间随机 */
     const n=pickCount();
@@ -1883,10 +2300,10 @@ function replyOther(){
   const pinCardPct=Math.min(100,Math.max(0,Number(chatSettings.pinCardPct)||0));
   /* 引用：按「引用概率」掷骰子，中了就把你最近一条消息带在回复气泡顶上 */
   const quotePct=Math.min(100,Math.max(0,Number(chatSettings.quotePct)||0));
-  let replyQuote=null;
+  let replyQuote=null,replyQuoteMid=null;
   if(quotePct>0&&Math.random()*100<quotePct){
     for(let i=history.length-1;i>=0;i--){const m=history[i];
-      if(m&&m.side==='me'&&m.type!=='pat'&&m.type!=='system'&&m.text){replyQuote=msgPlainText(m);break}}
+      if(m&&m.side==='me'&&m.type!=='pat'&&m.type!=='system'&&m.text){replyQuote=msgPlainText(m);replyQuoteMid=chatMid(m);break}}
     if(replyQuote&&String(replyQuote).startsWith('data:image'))replyQuote='[表情]';
     if(replyQuote&&replyQuote.length>60)replyQuote=replyQuote.slice(0,60)+'…';
   }
@@ -1894,7 +2311,7 @@ function replyOther(){
   let remain=count;
   const done=()=>{if(--remain<=0)hideTyping()};
   /* 来电由联系人发消息时判定；每条回复独立摇骰子，callBusy 防止一轮里重复来电 */
-  const emit=(t,gap,type)=>{setTimeout(()=>{const rec=addMsg('other',t,type,'',type===''?replyQuote:null);maybeRecallLater(rec);maybeIncomingCall();done()},gap)};
+  const emit=(t,gap,type)=>{setTimeout(()=>{const rec=addMsg('other',t,type,'',type===''?replyQuote:null,type===''?replyQuoteMid:null);maybeRecallLater(rec);maybeIncomingCall();done()},gap)};
   for(let i=0;i<count;i++){
     const gap=i===0?0:getReplyDelay();
     /* 每条回复先掷「是否拼卡」的骰子：抽中则本条用拼卡，不再发单条 */
@@ -1937,8 +2354,8 @@ function afterMyMessage(){
 }
 function sendMessage(){
   const t=chatInput.value.trim();if(!t)return;
-  addMsg('me',t,'','',quoteDraft);
-  if(quoteDraft){quoteDraft='';$('quoteBar').hidden=true}
+  addMsg('me',t,'','',quoteDraft,quoteDraftMid);
+  if(quoteDraft){quoteDraft='';quoteDraftMid='';$('quoteBar').hidden=true}
   chatInput.value='';
   /* 发送后保持输入框聚焦：安卓上按钮抢焦点会让键盘先收再弹，输入栏就会「回位弹跳」 */
   try{chatInput.focus({preventScroll:true})}catch(err){}
@@ -1950,7 +2367,7 @@ sendBtn.onclick=sendMessage;
 chatInput.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sendMessage()}};
 
 /* ===== 长按气泡：引用 / 撤回 ===== */
-let quoteDraft='';
+let quoteDraft='',quoteDraftMid='';
 /* 消息行（不含日期条）与 history 一一对应，按位置找记录 */
 function msgRows(){return Array.prototype.slice.call(chatBody.querySelectorAll('.msg-row:not(.date-row)'))}
 /* 长按后浮在气泡上方的小图标条（全局只建一个，谁长按就挂到谁头上）
@@ -2025,6 +2442,24 @@ chatBody.addEventListener('selectstart',e=>{if(e.target.closest&&e.target.closes
 document.addEventListener('selectionchange',()=>{
   try{const s=window.getSelection();if(s&&!s.isCollapsed&&chat.contains(s.anchorNode))s.removeAllRanges()}catch(e){}
 });
+/* 点气泡里的引用小字：问卷答案 → 弹浮层看当时的问卷（不滚动定位）；普通引用 → 跳回原消息并高亮 */
+chatBody.addEventListener('click',e=>{
+  const q=e.target.closest('.msg-quote');if(!q||!q.dataset.qmid)return;
+  const mid=q.dataset.qmid;
+  let src=null;
+  for(let i=0;i<history.length;i++){if(history[i]&&history[i].mid===mid){src=history[i];break}}
+  hideMsgActs();
+  if(q.title==='点击查看当时的问卷'||(src&&src.type==='survey')){
+    openSurveyView(mid,q.textContent);
+    return;
+  }
+  const target=msgRows().find(r=>r.dataset.mid===mid);
+  if(!target)return; /* 原消息可能已被撤回 */
+  target.scrollIntoView({behavior:'smooth',block:'center'});
+  chatBody.querySelectorAll('.msg-row.q-flash').forEach(r=>r.classList.remove('q-flash'));
+  void target.offsetWidth;target.classList.add('q-flash');
+  setTimeout(()=>target.classList.remove('q-flash'),1300);
+});
 /* 点图标执行动作 */
 msgActBar.addEventListener('click',e=>{
   const btn=e.target.closest('.msg-act');if(!btn)return;
@@ -2035,7 +2470,7 @@ msgActBar.addEventListener('click',e=>{
     copyPlainText(String(txt).startsWith('data:image')?'[表情]':txt);
   }else if(btn.dataset.act==='quote'){
     let txt=msgPlainText(history[idx]);if(String(txt).startsWith('data:image'))txt='[表情]';
-    quoteDraft=txt;
+    quoteDraft=txt;quoteDraftMid=chatMid(history[idx]);
     $('quoteText').textContent='引用：'+txt;
     $('quoteBar').hidden=false;
     try{chatInput.focus({preventScroll:true})}catch(err){}
@@ -2046,7 +2481,7 @@ msgActBar.addEventListener('click',e=>{
     addMsg('me',mine?'你撤回了一条消息':'你撤回了'+(profile.nickname||'TA')+'的一条消息','system');
   }
 });
-$('quoteCancel').onclick=()=>{quoteDraft='';$('quoteBar').hidden=true};
+$('quoteCancel').onclick=()=>{quoteDraft='';quoteDraftMid='';$('quoteBar').hidden=true};
 
 /* 折叠动画速度中和：固定时长下，内容矮的卡片显得慢、内容长的卡片显得快；
    改为按内容实际高度动态计算时长（像素速度一致），矮卡 0.28s 封底、长卡 0.52s 封顶 */
@@ -2104,7 +2539,17 @@ function setFoldDuration(card){
   });
 })();
 
-/* 自动联系 */
+/* 自动联系 / 真实模拟自动留言：
+   是否「我不在线」以我最后发的一条消息为起点，满 2 小时才算；
+   页面开合、是否打开链接都不影响（关闭期间的留言在重新打开时按真实时间补上）。 */
+const QUIET_MS=2*3600*1000;   /* 我发消息后 2 小时的冷静期，之后 TA 才开始自动留言 */
+function lastMyMsgAt(){
+  /* 只用真正的锚点 ynLastMyMsg（我最后发消息时间）。
+     切勿回退到 ynAutoFrom：那是会被定时器/补发反复推进的游标，会让"我不在线"的基准漂移。 */
+  let t=0;
+  try{t=Number(localStorage.getItem('ynLastMyMsg'))||0}catch(e){}
+  return t;
+}
 let autoContactTimer=null;
 function resetAutoContactTimer(){
   if(autoContactTimer){clearTimeout(autoContactTimer);autoContactTimer=null}
@@ -2112,13 +2557,20 @@ function resetAutoContactTimer(){
   const sec=Number(chatSettings.autoContactSec)||60;
   autoContactTimer=setTimeout(()=>{
     if(chatSettings.autoContactOn){
-      contactState.tick+=1; /* 每次联系检查算一个统计单位 */
-      if(contactState.budget<0||contactState.tick>=QUOTA_WINDOW) settleQuota(contactState,chatSettings.autoContactPct);
-      const leftChance=Math.max(1,QUOTA_WINDOW-contactState.tick);
-      if(contactState.budget>0 && Math.random() < contactState.budget/leftChance){
-        contactState.budget--;
-        const t=composeOtherText(true);
-        if(t){const rec=addMsg('other',t,'','auto');maybeRecallLater(rec);maybeIncomingCall()}
+      const base=lastMyMsgAt(),now=Date.now();
+      /* 只有我超过 2 小时没发消息，才算"不在线"，进入自动留言阶段 */
+      if(base&&now-base>=QUIET_MS){
+        contactState.tick+=1; /* 每次联系检查算一个统计单位 */
+        if(contactState.budget<0||contactState.tick>=QUOTA_WINDOW) settleQuota(contactState,chatSettings.autoContactPct);
+        const leftChance=Math.max(1,QUOTA_WINDOW-contactState.tick);
+        if(contactState.budget>0 && Math.random() < contactState.budget/leftChance){
+          contactState.budget--;
+          const t=composeOtherText(true);
+          if(t){
+            const rec=addMsg('other',t,'','auto');maybeRecallLater(rec);maybeIncomingCall();
+            try{localStorage.setItem('ynAutoFrom',String(Date.now()))}catch(e){} /* 游标推进，避免重开时重复补发 */
+          }
+        }
       }
     }
     resetAutoContactTimer();
@@ -2126,16 +2578,37 @@ function resetAutoContactTimer(){
 }
 
 /* ===== 声音提醒：Web Audio 合成，不依赖外部音频文件 ===== */
-let ynAudioCtx=null,ynCallRingTimer=null;
+let ynAudioCtx=null,ynCallRingTimer=null,ynKeepAlive=null;
 function ynAudio(){
   if(ynAudioCtx)return ynAudioCtx;
   try{const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;ynAudioCtx=new AC()}catch(e){return null}
   return ynAudioCtx;
 }
-function ynUnlock(){const c=ynAudio();if(c&&c.state==='suspended'){try{c.resume()}catch(e){}}}
-/* 首次触摸/点击时解锁音频（移动端自动播放策略） */
-document.addEventListener('touchstart',ynUnlock,{passive:true});
-document.addEventListener('mousedown',ynUnlock);
+/* 常驻静音振荡器：很多 WebView 在音频空闲几十秒后会自动把 AudioContext 挂起，
+   导致「开关开着、偶尔没声音」。保持一条几乎无声的振荡器常跑，上下文就不会被回收。 */
+function ynKeepAliveOn(){
+  const c=ynAudio();if(!c||ynKeepAlive)return;
+  try{
+    const o=c.createOscillator(),g=c.createGain();
+    g.gain.value=0.000001;o.frequency.value=220;
+    o.connect(g);g.connect(c.destination);o.start(0);ynKeepAlive=o;
+  }catch(e){}
+}
+function ynUnlock(){
+  const c=ynAudio();if(!c)return;
+  if(c.state==='suspended'||c.state==='interrupted'){
+    try{const p=c.resume();if(p&&p.catch)p.catch(()=>{})}catch(e){}
+  }
+  ynKeepAliveOn();
+}
+/* 首次触摸/点击/按键时解锁音频（移动端自动播放策略）。
+   多挂几种手势事件：有的 WebView 只发 touchend / pointerdown，确保有一次落在真实手势里。 */
+['touchstart','touchend','mousedown','pointerdown','click','keydown'].forEach(ev=>{
+  document.addEventListener(ev,ynUnlock,{passive:true});
+});
+/* 页面重新可见时也恢复一次：切后台回来上下文常被挂起，这是"有时不灵"的另一大来源 */
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)ynUnlock()});
+window.addEventListener('focus',ynUnlock);
 /* 单音符：freq 频率，at 延迟秒，dur 时长秒，vol 音量 */
 function ynTone(c,freq,at,dur,vol){
   try{
@@ -2151,29 +2624,26 @@ function ynTone(c,freq,at,dur,vol){
     o.start(t);o.stop(t+dur+0.01);
   }catch(e){}
 }
-/* 音频未解锁时先恢复再播，避免 suspended 期间音符堆积、解锁瞬间一起响 */
+/* 音频未解锁时先恢复再播，避免 suspended 期间音符堆积、解锁瞬间一起响。
+   关键：resume() 必须在真实手势里调用才生效——这是"开关开了却没声音"的常见原因。
+   这里除了手势里主动 resume，再兜一层 resume 后回调，确保恢复完成再发声。 */
 function withAudio(fn){
   const c=ynAudio();if(!c)return;
-  if(c.state==='running'){try{fn(c)}catch(e){}return}
-  if(c.state==='suspended'){
-    try{
-      const p=c.resume();
-      if(p&&typeof p.then==='function'){
-        p.then(()=>{if(c.state==='running'){try{fn(c)}catch(e){}}}).catch(()=>{});
-        return;
-      }
-    }catch(e){}
-    try{c.resume()}catch(e){}
-    if(c.state==='running'){try{fn(c)}catch(e){}}
-  }
+  let done=false;
+  const play=()=>{if(done)return;done=true;try{fn(c)}catch(e){}};
+  if(c.state==='running'){play();return}
+  /* 先同步尝试一次：部分 WebView 的 resume() 不返回 Promise，或回调不触发 */
+  try{const p=c.resume();if(p&&typeof p.then==='function')p.then(play).catch(()=>{})}catch(e){}
+  setTimeout(play,0);
+  setTimeout(play,90); /* 兜底：延迟再试一次，确保解锁完成后一定能发声 */
 }
-/* 消息提示音：统一用试听 7「清脆B」（987.77Hz 单声短音），我发 / 收到消息都用它 */
+/* 消息提示音：清脆双音，音量比原来调大，确保手机能听见 */
 function playMsgSound(){
   if(!chatSettings.notifyMsgOn)return;
   const now=Date.now();
   if(now-(playMsgSound._last||0)<350)return; /* 多条连发时避免声音叠在一起 */
   playMsgSound._last=now;
-  withAudio(c=>{ynTone(c,987.77,0.02,0.11,0.11)});
+  withAudio(c=>{ynTone(c,988,0,0.13,0.22);ynTone(c,1319,0.1,0.16,0.2)});
 }
 /* 来电铃声：试听 6「双音重复」，两声一组循环两遍，接听或挂断时停止 */
 function playCallRing(){
@@ -2181,8 +2651,8 @@ function playCallRing(){
   if(!chatSettings.notifyCallOn)return;
   const ring=()=>withAudio(c=>{
     for(let k=0;k<2;k++){
-      ynTone(c,784,k*0.5,0.14,0.11);
-      ynTone(c,988,k*0.5+0.18,0.14,0.11);
+      ynTone(c,784,k*0.5,0.18,0.22);
+      ynTone(c,988,k*0.5+0.2,0.18,0.22);
     }
   });
   ring();
@@ -2371,6 +2841,8 @@ function applySettingsScope(scope){
     const visible=Array.prototype.filter.call(setTabs,t=>t.style.display!=='none');
     wrap.style.display=visible.length>1?'':'none';
   }
+  /* 返回键只在聊天页进入的设置里显示；主页齿轮进来的设置靠底部工具栏切换，不需要返回键 */
+  const back=$('setBack');if(back)back.style.display=(scope==='chat')?'':'none';
 }
 let currentSettingsTab='figure';
 function switchSettingsTab(tab){
@@ -2402,6 +2874,8 @@ function closeSettings(){
   if(settingsScope==='home')showHome();
 }
 navSetting.onclick=e=>{e.stopPropagation();openSettings('figure','chat')};
+/* 设置页顶部返回键：关掉设置页，回到进来的地方（主页进来的回主页，聊天进来的回聊天） */
+const setBack=$('setBack');if(setBack)setBack.onclick=closeSettings;
 setTabs.forEach(t=>t.onclick=()=>switchSettingsTab(t.dataset.tab));
 
 /* ================= 联系人资料页 ================= */
@@ -2473,10 +2947,19 @@ function readImageCompressed(file,maxSide,quality,cb){
   img.src=url;
 }
 /* 壁纸通透度：数值越大白纱越薄（100 = 壁纸原样），越小越朦胧 */
+/* 华为 Mate 20 / 夸克 X5 兼容：CSS 变量里塞超长 base64 data URL 常解析失败，
+   导致「选了壁纸页面不变」。改为拼好完整 background-image 直接内联到 body，绕开变量解析。 */
+function wallBgValue(){
+  const v=Math.max(0,Math.min(100,Number(wallClarity)||0));
+  const veil=((1-v/100)*.9).toFixed(3);
+  return 'linear-gradient(rgba(255,255,255,'+veil+'),rgba(255,255,255,'+veil+')),url("'+wallpaper+'")';
+}
 function applyWallClarity(){
   const v=Math.max(0,Math.min(100,Number(wallClarity)||0));
   document.body.style.setProperty('--wall-veil',((1-v/100)*.9).toFixed(3));
   const out=$('wallClarityVal');if(out)out.textContent=Math.round(v)+'%';
+  /* 壁纸随通透度实时重绘，直接内联，夸克下立即生效 */
+  if(wallpaper)document.body.style.backgroundImage=wallBgValue();
 }
 /* 壁纸平均亮度：抽 8x8 缩略图取加权和，够判断深浅了 */
 function computeWallLuma(src,done){
@@ -2513,11 +2996,12 @@ function applyFontInvert(){
 function applyWallpaper(){
   const b=document.body;
   if(wallpaper){
-    b.style.setProperty('--wall','url("'+wallpaper+'")');
     b.classList.add('has-wallpaper');
+    b.style.backgroundImage=wallBgValue();   /* 夸克兼容：直接内联，不走 var(--wall) */
     applyWallClarity();
   }else{
     b.classList.remove('has-wallpaper');
+    b.style.removeProperty('background-image');
     b.style.removeProperty('--wall');
     b.style.removeProperty('--wall-veil');
   }
@@ -2794,6 +3278,18 @@ function clampChatField(id,v){
 });
 ['readIgnoreOn','autoContactOn','pinCardOn','callNoAutoHangup','notifyMsgOn','notifyCallOn'].forEach(id=>{const el=$(id);if(el)el.addEventListener('change',()=>{
   if(id==='readIgnoreOn')chatSettings.readIgnoreOn=el.checked; else if(id==='autoContactOn')chatSettings.autoContactOn=el.checked; else if(id==='pinCardOn')chatSettings.pinCardOn=el.checked; else if(id==='callNoAutoHangup')chatSettings.callNoAutoHangup=el.checked; else if(id==='notifyMsgOn')chatSettings.notifyMsgOn=el.checked; else if(id==='notifyCallOn')chatSettings.notifyCallOn=el.checked;
+  /* 声音开关在真实点击手势里立刻解锁音频并试响一声：确保之后被动收到消息时上下文处于 running */
+  if(id==='notifyMsgOn'||id==='notifyCallOn'){
+    ynUnlock();
+    if(el.checked){const now=Date.now();if(now-(playMsgSound._last||0)>350){playMsgSound._last=now;withAudio(c=>{ynTone(c,988,0,0.13,0.3)})}}
+  }
+  /* 主动联系开关必须立即重启定时器：开启后按时发第一条，关闭后立刻停；
+     之前只保存设置不重启，导致开着开关却永远不触发（定时器初始化时是关的，直接 return 掉了）。 */
+  if(id==='autoContactOn'){
+    contactState.budget=-1;contactState.tick=0;resetAutoContactTimer();
+    /* 刚打开开关：若我已超过 2 小时没发消息，立刻按真实时间补一段离线留言 */
+    if(el.checked)setTimeout(catchUpOfflineChat,60);
+  }
   updateChatSummaries();saveChatSettings();
 })});
 
@@ -2833,7 +3329,7 @@ $('recordDeleteAll').onclick=()=>{
 };
 
 /* ================= 数据整理：整包导出 / 导入（聊天记录 + 字卡库 + 朋友圈 + 邮箱） =================
-   JSON / TXT 两种格式：TXT 文件内容与 JSON 相同（纯文本备份），导入时两种都能读。 */
+   导出为 JSON 格式；导入兼容 JSON / TXT（旧版 TXT 备份内容与 JSON 相同，仍可读）。 */
 function expSelection(){
   const sel={chat:false,cards:false,moments:false,mail:false,settings:false};
   document.querySelectorAll('#expSelCats input[type=checkbox][value]').forEach(c=>{if(c.value in sel)sel[c.value]=c.checked});
@@ -2874,7 +3370,6 @@ function expDownload(ext){
 /* 点导出按钮时才弹出类别选择（单选或全选），确认后按所选格式下载 */
 let expPendingFormat='json';
 $('expExportJson').onclick=()=>{expPendingFormat='json';$('expSelModal').classList.add('show')};
-$('expExportTxt').onclick=()=>{expPendingFormat='txt';$('expSelModal').classList.add('show')};
 $('expSelCancel').onclick=()=>$('expSelModal').classList.remove('show');
 $('expSelModal').onclick=e=>{if(e.target===$('expSelModal'))$('expSelModal').classList.remove('show')};
 $('expSelOk').onclick=()=>{$('expSelModal').classList.remove('show');expDownload(expPendingFormat)};
@@ -3500,12 +3995,13 @@ function runMomentPlan(){
   mpTimer=setTimeout(runMomentPlan,delay);
 }
 
-/* ===== 聊天离线补发：没打开页面时 TA 也"照常"发消息，打开后看到离开期间的消息 =====
-   前提：聊天页设置 · 聊天里的「主动联系」开启；删除 TA 后不补发。
+/* ===== 聊天离线补发：我不发消息满 2 小时后，TA 就"照常"发消息，打开后看到这段时间的留言 =====
+   前提：以我最后发的一条消息为起点、满 2 小时算「我不在线」（不管页面开没开、有没有打开链接）；
+         聊天页设置 · 聊天里的「主动联系」开启；删除 TA 后不补发。
    档位（不满进上一档）：1 天内最多 5 条；1~3 天每天 3 条；3~5 天每天 1 条；
    5~15 天每 2 天 1 条；15~30 天每 5 天 1 条；超过一个月偶尔冒泡（3~5 条）。
-   时间戳铺在离开期间的真实时间里（默认只在 8:00~23:30，偶尔 1~2 条深夜消息），
-   打开主页时聊天图标亮红点。 */
+   时间戳铺在离线期间的真实时间里（默认只在 8:00~23:30，偶尔 1~2 条深夜消息），
+   补发游标 ynAutoFrom 避免重复补同一段，打开主页时聊天图标亮红点。 */
 let lastSeenTimer=null;
 function touchLastSeen(){try{localStorage.setItem('ynLastSeen',String(Date.now()))}catch(e){}}
 function offlineMsgCount(days){
@@ -3540,18 +4036,39 @@ function offlineScheduleTimes(startMs,endMs,n){
   return times.sort((a,b)=>a-b);
 }
 function catchUpOfflineChat(){
-  /* 先读上次在线时间，再刷新本次时间——顺序反了会永远算出"离开 0 分钟" */
-  let prev=0;try{prev=Number(localStorage.getItem('ynLastSeen'))||0}catch(e){}
-  touchLastSeen();
+  /* 「我不在线」的真实基准 = 我最后发的一条消息时间（不管页面开没开、有没有打开链接）。
+     锚点只认 ynLastMyMsg；ynAutoFrom 只是补发时间戳的游标，绝不当锚点。 */
+  let last=lastMyMsgAt();
+  if(!last){
+    /* 从来没有我发的消息：用初始化时间建立锚点，满 2 小时后开始自动留言 */
+    last=Date.now();
+    try{
+      localStorage.setItem('ynLastMyMsg',String(last));
+      localStorage.setItem('ynAutoFrom',String(last));
+      localStorage.setItem('ynAutoCount','0');
+    }catch(e){}
+  }
   if(taDeleted()||!chatSettings.autoContactOn)return;
-  /* 首次使用（没有记录）或离开不足 30 分钟不算"离开"，避免每次刷新都补发 */
-  if(!prev)return;
-  const absence=Date.now()-prev;
-  if(absence<30*60*1000)return;
-  const days=absence/86400000;
-  let n=offlineMsgCount(days);
-  if(absence<2*3600*1000)n=Math.min(n,3);               /* 离开不到 2 小时最多 3 条，更像真人 */
-  const times=offlineScheduleTimes(prev,Date.now(),n);
+  const now=Date.now();
+  const silence=now-last;                       /* 我没发消息的总时长 */
+  if(silence<QUIET_MS)return;                   /* 不满 2 小时不算"不在线"，不补发 */
+
+  /* 档位条数：严格按「我没发消息的总时长」算（这是原本真实模拟的设计），
+     而不是按本次补发窗口的长短——否则开着页面时被定时器一点点推进游标，
+     窗口越切越碎，条数就越算越少，档位曲线（越久越克制 / 极久冒泡）就失效了。 */
+  const totalDays=silence/86400000;
+  const target=offlineMsgCount(totalDays);      /* 这段离线期应有的留言总数 */
+  let sent=0;try{sent=Number(localStorage.getItem('ynAutoCount'))||0}catch(e){}
+  const need=target-sent;                       /* 还差几条（定时器已发的计入 sent） */
+  if(need<=0)return;                            /* 本轮已发够，不重复 */
+
+  /* 游标只负责把这几条的时间戳铺在哪一段、并避免和已补的重叠 */
+  let cursor=0;
+  try{cursor=Number(localStorage.getItem('ynAutoFrom'))||0}catch(e){}
+  const quietEnd=last+QUIET_MS;                 /* 冷静期结束、开始算离线的时刻 */
+  if(cursor<quietEnd)cursor=quietEnd;           /* 不早于冷静期结束点 */
+  if(cursor>=now)cursor=now;                    /* 已补到当前：时间戳就落在当下 */
+  const times=offlineScheduleTimes(cursor,now,need);
   let added=0;
   times.forEach(t=>{
     const text=composeOtherText(true);if(!text)return;
@@ -3561,6 +4078,10 @@ function catchUpOfflineChat(){
     history.push(rec);added++;
   });
   if(!added)return;
+  try{
+    localStorage.setItem('ynAutoCount',String(sent+added)); /* 累加已发，防重复补 */
+    localStorage.setItem('ynAutoFrom',String(now));          /* 游标推进到本次末端 */
+  }catch(e){}
   saveHistory();
   if(chatVisible()){chatBody.innerHTML='';restoreHistory()}
   else setAppDot('chat',true);
@@ -4180,11 +4701,12 @@ profileSave.onclick=()=>{
 /* ================= 初始化 ================= */
 renderNav();restoreHistory();renderHomePreview();seedMomentsIfEmpty();seedMailsIfEmpty();loadAppDots();
 catchUpOfflineChat();                    /* 离开期间 TA 发的消息，打开时按真实时间补进来 */
+scheduleSurveyReplies();                 /* 未作答问卷：到点/已过点，排定时器补答 */
 setInterval(touchLastSeen,30000);        /* 开着页面时持续记录"最后在线时间"，供下次离线补发计算 */
 window.addEventListener('beforeunload',touchLastSeen);
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden')touchLastSeen();
-  else{runMomentPlan();runMailPlan()}    /* 切回页面立即结算到期任务：后台标签页定时器会被浏览器节流/暂停 */
+  else{catchUpOfflineChat();scheduleSurveyReplies();runMomentPlan();runMailPlan()}    /* 切回页面立即结算到期任务：后台标签页定时器会被浏览器节流/暂停 */
 });
 resetAutoContactTimer();runMomentPlan();runMailPlan();
 /* 开屏关闭：多重保险，避免夸克/华为内核上定时器或 CSS 过渡失效导致黑屏残留、盖住主页点击 */
